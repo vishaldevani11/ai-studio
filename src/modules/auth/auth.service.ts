@@ -6,9 +6,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { User, UserRole, UserStatus } from '../../database/entities/user.entity';
 import { UserAddress } from '../../database/entities/user-address.entity';
 import { UserBusiness } from '../../database/entities/user-business.entity';
@@ -32,6 +34,7 @@ export class AuthService {
     @InjectDataSource()
     private dataSource: DataSource,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
@@ -279,6 +282,70 @@ export class AuthService {
     });
   }
 
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+      // To prevent email enumeration, we don't throw an error here.
+      // We just silently fail.
+      return;
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const passwordResetToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+
+    const passwordResetExpires = new Date(
+      Date.now() +
+        this.configService.get<number>('auth.passwordResetTokenExpiresIn'),
+    );
+
+    await this.userRepository.update(user.id, {
+      passwordResetToken,
+      passwordResetExpires,
+    });
+
+    // In a real application, you would send an email to the user with the resetToken.
+    // For this example, we'll just log it to the console.
+    console.log(`Password reset token for ${email}: ${resetToken}`);
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const passwordResetToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    const user = await this.userRepository.findOne({
+      where: {
+        passwordResetToken,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Password reset token is invalid');
+    }
+
+    if (user.passwordResetExpires < new Date()) {
+      throw new BadRequestException('Password reset token has expired');
+    }
+
+    const isSamePassword = await bcrypt.compare(newPassword, user.passwordHash);
+    if (isSamePassword) {
+      throw new BadRequestException(
+        'New password must be different from the current password',
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    await this.userRepository.update(user.id, {
+      passwordHash: hashedPassword,
+      passwordResetToken: null,
+      passwordResetExpires: null,
+    });
+  }
+
   async validateUserById(userId: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id: userId, status: UserStatus.ACTIVE },
@@ -401,12 +468,12 @@ export class AuthService {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_SECRET,
-        expiresIn: process.env.JWT_EXPIRES_IN || '15m',
+        secret: this.configService.get<string>('auth.jwtSecret'),
+        expiresIn: this.configService.get<string>('auth.jwtExpiresIn'),
       }),
       this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_REFRESH_SECRET,
-        expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+        secret: this.configService.get<string>('auth.jwtRefreshSecret'),
+        expiresIn: this.configService.get<string>('auth.jwtRefreshExpiresIn'),
       }),
     ]);
 
@@ -417,7 +484,7 @@ export class AuthService {
   }
 
   private async updateRefreshToken(userId: string, refreshToken: string): Promise<void> {
-    const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+    const expiresIn = this.configService.get<string>('auth.jwtRefreshExpiresIn');
     const expiresAt = new Date();
     
     // Parse expires in (e.g., '7d', '15m')

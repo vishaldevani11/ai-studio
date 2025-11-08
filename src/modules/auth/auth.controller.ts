@@ -7,6 +7,8 @@ import {
   Patch,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -21,20 +23,26 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { AuthResponseDto, UserResponseDto } from './dto/auth-response.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { AuthResponseDto } from './dto/auth-response.dto';
+import { ProfileDto } from './dto/profile.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { RateLimit } from '../../security/decorators/rate-limit.decorator';
 import { User } from '../../database/entities/user.entity';
 import { ResponseUtil } from '../../common/utils/response.util';
 
 @ApiTags('Authentication')
 @Controller('auth')
+@UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
   @Post('register')
+  @RateLimit({ limit: 10, window: 60 * 15 }) // 10 requests per 15 minutes 
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({
@@ -53,6 +61,7 @@ export class AuthController {
 
   @Public()
   @Post('login')
+  @RateLimit({ limit: 10, window: 60 * 15 }) // 10 requests per 15 minutes 
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login user' })
   @ApiBody({ type: LoginDto })
@@ -71,6 +80,7 @@ export class AuthController {
   }
 
   @Public()
+  @UseGuards(JwtAuthGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token' })
@@ -84,10 +94,8 @@ export class AuthController {
     status: 401,
     description: 'Invalid refresh token',
   })
-  async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
-    // In a real implementation, you would extract the user ID from the refresh token
-    // For now, we'll need to modify the strategy to handle this properly
-    throw new Error('Refresh token endpoint needs proper implementation');
+  async refresh(@CurrentUser() user: User, @Body() refreshTokenDto: RefreshTokenDto) {
+    return this.authService.refreshToken(user.id, refreshTokenDto.refreshToken);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -104,6 +112,46 @@ export class AuthController {
     return ResponseUtil.success(null, 'User logged out successfully');
   }
 
+  @Public()
+  @Post('forgot-password')
+  @RateLimit({ limit: 5, window: 60 * 10 }) // 5 requests per 10 minutes
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request a password reset' })
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset instructions sent if the email is valid',
+  })
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    await this.authService.forgotPassword(forgotPasswordDto.email);
+    return ResponseUtil.success(
+      null,
+      'Password reset instructions sent if the email is valid',
+    );
+  }
+
+  @Public()
+  @Post('reset-password')
+  @RateLimit({ limit: 5, window: 60 * 10 }) // 5 requests per 10 minutes
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset a password with a valid token' })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Password has been successfully reset',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid or expired password reset token',
+  })
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    await this.authService.resetPassword(
+      resetPasswordDto.token,
+      resetPasswordDto.newPassword,
+    );
+    return ResponseUtil.success(null, 'Password has been successfully reset');
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiBearerAuth()
@@ -111,65 +159,14 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'User profile retrieved successfully',
-    type: UserResponseDto,
+    type: ProfileDto,
   })
   async getProfile(@CurrentUser() user: User) {
     const userProfile = await this.authService.getProfile(user.id);
-    
-    const profileData = {
-      id: userProfile.id,
-      email: userProfile.email,
-      firstName: userProfile.firstName,
-      lastName: userProfile.lastName || undefined,
-      phone: userProfile.phone || undefined,
-      role: userProfile.role,
-      status: userProfile.status,
-      emailVerified: userProfile.emailVerified,
-      phoneVerified: userProfile.phoneVerified,
-      emailSubscribed: userProfile.emailSubscribed,
-      profileImage: userProfile.profileImage || undefined,
-      lastLogin: userProfile.lastLogin || undefined,
-      referralCode: userProfile.referralCode || undefined,
-      createdAt: userProfile.createdAt,
-      updatedAt: userProfile.updatedAt,
-      addresses: userProfile.addresses?.map((addr) => ({
-        id: addr.id,
-        addressType: addr.addressType,
-        street: addr.street,
-        city: addr.city,
-        state: addr.state,
-        zipcode: addr.zipcode,
-        country: addr.country,
-        createdAt: addr.createdAt,
-        updatedAt: addr.updatedAt,
-      })) || [],
-      business: userProfile.business ? {
-        id: userProfile.business.id,
-        businessName: userProfile.business.businessName,
-        businessType: userProfile.business.businessType,
-        businessSegment: userProfile.business.businessSegment,
-        businessDescription: userProfile.business.businessDescription,
-        gstNumber: userProfile.business.gstNumber,
-        websiteUrl: userProfile.business.websiteUrl,
-        businessLogo: userProfile.business.businessLogo,
-        createdAt: userProfile.business.createdAt,
-        updatedAt: userProfile.business.updatedAt,
-      } : null,
-      subscriptions: userProfile.subscriptions?.map((sub) => ({
-        id: sub.id,
-        plan: sub.plan,
-        status: sub.status,
-        startDate: sub.startDate,
-        endDate: sub.endDate,
-        autoRenew: sub.autoRenew,
-        paymentMethod: sub.paymentMethod,
-        creditsRemaining: sub.creditsRemaining,
-        createdAt: sub.createdAt,
-        updatedAt: sub.updatedAt,
-      })) || [],
-    };
-    
-    return ResponseUtil.success(profileData, 'Profile retrieved successfully');
+    return ResponseUtil.success(
+      new ProfileDto(),
+      'Profile retrieved successfully',
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -181,7 +178,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Profile updated successfully',
-    type: UserResponseDto,
+    type: ProfileDto,
   })
   @ApiResponse({
     status: 409,
@@ -191,27 +188,14 @@ export class AuthController {
     @CurrentUser() user: User,
     @Body() updateProfileDto: UpdateProfileDto,
   ) {
-    const updatedUser = await this.authService.updateProfile(user.id, updateProfileDto);
-    
-    const profileData = {
-      id: updatedUser.id,
-      email: updatedUser.email,
-      firstName: updatedUser.firstName,
-      lastName: updatedUser.lastName || undefined,
-      phone: updatedUser.phone || undefined,
-      role: updatedUser.role,
-      status: updatedUser.status,
-      emailVerified: updatedUser.emailVerified,
-      phoneVerified: updatedUser.phoneVerified,
-      emailSubscribed: updatedUser.emailSubscribed,
-      profileImage: updatedUser.profileImage || undefined,
-      lastLogin: updatedUser.lastLogin || undefined,
-      referralCode: updatedUser.referralCode || undefined,
-      createdAt: updatedUser.createdAt,
-      updatedAt: updatedUser.updatedAt,
-    };
-    
-    return ResponseUtil.success(profileData, 'Profile updated successfully');
+    const updatedUser = await this.authService.updateProfile(
+      user.id,
+      updateProfileDto,
+    );
+    return ResponseUtil.success(
+      new ProfileDto(),
+      'Profile updated successfully',
+    );
   }
 
   @UseGuards(JwtAuthGuard)

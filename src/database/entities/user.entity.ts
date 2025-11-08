@@ -75,16 +75,19 @@ export class User extends BaseEntity {
   @Column({ name: 'referral_code', length: 50, nullable: true })
   referralCode: string;
 
-  @Column({ name: 'refresh_token', nullable: true })
-  refreshToken: string;
+  @Column({ type: 'varchar', length: 255, nullable: true, select: false })
+  refreshToken?: string;
 
-  @Column({ name: 'refresh_token_expires', type: 'timestamp with time zone', nullable: true })
-  refreshTokenExpires: Date;
+  @Column({ type: 'timestamp', nullable: true, select: false })
+  refreshTokenExpires?: Date;
 
- // @OneToMany(() => Image, (image) => image.user)
-  //images: Image[];
+  @Column({ type: 'varchar', length: 255, nullable: true, select: false })
+  passwordResetToken?: string;
 
-  @OneToMany(() => UserAddress, (address) => address.user)
+  @Column({ type: 'timestamp', nullable: true, select: false })
+  passwordResetExpires?: Date;
+
+  @OneToMany(() => UserAddress, (address) => address.user, { cascade: true })
   addresses: UserAddress[];
 
   @OneToOne(() => UserBusiness, (business) => business.user)
