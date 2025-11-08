@@ -1,6 +1,6 @@
-# Getting Started Guide
+# AI-app Backend Getting Started Guide
 
-This guide will help you set up and run the SaaS Backend Boilerplate locally.
+This guide will help you set up and run the AI-app Backend locally.
 
 ## 🚀 Quick Start
 
@@ -139,76 +139,10 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
   }'
 ```
 
-### 3. Generate an Image (with JWT token)
 
-```bash
-curl -X POST http://localhost:3000/api/v1/images \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{
-    "title": "Beautiful Sunset",
-    "description": "A beautiful sunset over the mountains",
-    "prompt": "A beautiful sunset over the mountains with vibrant colors"
-  }'
-```
 
-## 🐳 Docker Setup
 
-### Using Docker Compose
 
-```bash
-# Start all services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f app
-
-# Stop services
-docker-compose down
-```
-
-### Manual Docker Build
-
-```bash
-# Build image
-docker build -t saas-backend .
-
-# Run container
-docker run -p 3000:3000 \
-  -e DB_HOST=host.docker.internal \
-  -e DB_USERNAME=postgres \
-  -e DB_PASSWORD=password \
-  -e DB_DATABASE=saas_dev \
-  saas-backend
-```
-
-## 🔐 Environment Variables
-
-### Required Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DB_HOST` | Database host | `localhost` |
-| `DB_PORT` | Database port | `5432` |
-| `DB_USERNAME` | Database username | `postgres` |
-| `DB_PASSWORD` | Database password | `password` |
-| `DB_DATABASE` | Database name | `saas_dev` |
-| `JWT_SECRET` | JWT secret key | `your-secret-key` |
-| `JWT_REFRESH_SECRET` | JWT refresh secret | `your-refresh-secret` |
-| `GEMINI_API_KEY` | Gemini API key | `your-gemini-key` |
-| `STRIPE_SECRET_KEY` | Stripe secret key | `sk_test_...` |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook secret | `whsec_...` |
-
-### Optional Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment | `development` |
-| `PORT` | Server port | `3000` |
-| `CORS_ORIGIN` | CORS origins | `http://localhost:3000` |
-| `THROTTLE_TTL` | Rate limit TTL | `60` |
-| `THROTTLE_LIMIT` | Rate limit count | `100` |
-| `LOG_LEVEL` | Log level | `info` |
 
 ## 🚨 Troubleshooting
 
@@ -265,7 +199,7 @@ npm run typeorm -- query "SELECT 1"
 ## 🆘 Getting Help
 
 - Check the [README.md](./README.md) for detailed documentation
-- Review API documentation at `/api/docs`
+- Review API documentation at [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
 - Create an issue for bugs or feature requests
 - Check existing issues and discussions
 

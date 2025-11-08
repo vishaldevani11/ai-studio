@@ -1,6 +1,6 @@
-# SaaS Backend Boilerplate
+# AI-app Backend
 
-A production-ready SaaS backend boilerplate built with NestJS, TypeScript, PostgreSQL, and modern development practices.
+A production-ready backend for the AI-app, built with NestJS, TypeScript, PostgreSQL, and modern development practices.
 
 ## 🚀 Features
 
@@ -36,8 +36,8 @@ A production-ready SaaS backend boilerplate built with NestJS, TypeScript, Postg
 ### Modules
 - **AuthModule**: Register, Login, Refresh, Logout
 - **UserModule**: CRUD operations with role-based access
-- **ImageModule**: AI image generation with Gemini API
-- **BillingModule**: Stripe integration for subscriptions
+- **AdminModule**: Manages administrative tasks.
+- **WebAppModule**: Provides backend functionality for the web application.
 - **HealthModule**: Health and readiness checks
 - **CommonModule**: Shared utilities, guards, interceptors
 
@@ -49,15 +49,6 @@ A production-ready SaaS backend boilerplate built with NestJS, TypeScript, Postg
 
 ## 🚀 Quick Start
 
-### Option 1: Automated Setup (Recommended)
-```bash
-# Clone and setup everything automatically
-git clone <repository-url>
-cd saas-backend-boilerplate
-node start-dev.js
-```
-
-### Option 2: Manual Setup
 ```bash
 # 1. Clone the repository
 git clone <repository-url>
@@ -71,12 +62,6 @@ npm install
 
 # 4. Start the application
 npm run start:dev
-```
-
-### Option 3: Test Everything
-```bash
-# Run comprehensive tests
-node test-setup.js
 ```
 
 ## 🛠️ Installation
@@ -127,11 +112,7 @@ After starting the application, you'll have:
 - ✅ **API Server**: http://localhost:3000
 - ✅ **Swagger Docs**: http://localhost:3000/api/docs
 - ✅ **Health Check**: http://localhost:3000/api/v1/health
-- ✅ **Metrics**: http://localhost:3000/api/v1/metrics/prometheus
-- ✅ **Image Generation**: AI-powered with Gemini API
 - ✅ **Authentication**: JWT-based with refresh tokens
-- ✅ **File Storage**: Local + Cloud ready
-- ✅ **Monitoring**: Prometheus metrics
 - ✅ **Security**: Rate limiting, validation, CORS
 
 ## 🔧 Configuration
@@ -198,27 +179,7 @@ Once the application is running, you can access:
 | `PATCH` | `/api/v1/users/:id/change-password` | Change password | ✅ | User/Admin |
 | `DELETE` | `/api/v1/users/:id` | Delete user | ✅ | Admin |
 
-### 🎨 Image Generation Endpoints
 
-| Method | Endpoint | Description | Auth Required | Rate Limit |
-|--------|----------|-------------|---------------|------------|
-| `POST` | `/api/v1/images/generate` | **Generate AI image with Gemini** | ✅ | 10/hour |
-| `GET` | `/api/v1/images/generation-history` | Get generation history | ✅ | 100/hour |
-| `POST` | `/api/v1/images` | Create new image | ✅ | 100/hour |
-| `GET` | `/api/v1/images` | Get user's images | ✅ | 100/hour |
-| `GET` | `/api/v1/images/:id` | Get image by ID | ✅ | 100/hour |
-| `GET` | `/api/v1/images/:id/file` | Get image file | ✅ | 100/hour |
-| `PATCH` | `/api/v1/images/:id` | Update image | ✅ | 100/hour |
-| `DELETE` | `/api/v1/images/:id` | Delete image | ✅ | 100/hour |
-
-### 💳 Billing & Subscription Endpoints
-
-| Method | Endpoint | Description | Auth Required | Role |
-|--------|----------|-------------|---------------|------|
-| `POST` | `/api/v1/billing/subscription` | Create subscription | ✅ | User |
-| `GET` | `/api/v1/billing/subscription` | Get subscription | ✅ | User |
-| `PATCH` | `/api/v1/billing/subscription/cancel` | Cancel subscription | ✅ | User |
-| `POST` | `/api/v1/billing/webhook` | Stripe webhook | ❌ | - |
 
 ### 📊 Monitoring & Health Endpoints
 
@@ -229,38 +190,7 @@ Once the application is running, you can access:
 | `GET` | `/api/v1/metrics/health` | Detailed health metrics | ✅ |
 | `GET` | `/api/v1/metrics/json` | Metrics in JSON format | ✅ |
 
-### 🎯 Image Generation API Details
 
-#### Generate AI Image
-```bash
-POST /api/v1/images/generate
-Content-Type: multipart/form-data
-Authorization: Bearer <jwt-token>
-
-# Form Data:
-- images: File[] (max 5 files, 10MB each)
-- gender: "male" | "female"
-- style: "classic" | "indian-traditional" | "modern" | "casual" | "formal" | "ethnic" | "western" | "fusion" | "vintage" | "contemporary"
-- description: string (optional, max 500 chars)
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "id": "uuid",
-    "gender": "male",
-    "style": "indian-traditional",
-    "description": "Additional instructions",
-    "originalImages": ["/uploads/raw/abc123.jpg"],
-    "generatedImage": "/uploads/generated/xyz789.jpg",
-    "createdAt": "2025-01-17T10:00:00.000Z",
-    "status": "completed",
-    "processingTime": 2500
-  }
-}
-```
 
 ### 🔧 Quick API Testing
 
@@ -286,15 +216,7 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
   }'
 ```
 
-#### 3. Generate Image
-```bash
-curl -X POST http://localhost:3000/api/v1/images/generate \
-  -H "Authorization: Bearer <jwt-token>" \
-  -F "images=@test-image.jpg" \
-  -F "gender=male" \
-  -F "style=modern" \
-  -F "description=Make it look professional"
-```
+
 
 #### 4. Check Health
 ```bash
@@ -379,8 +301,8 @@ src/
 ├── modules/               # Feature modules
 │   ├── auth/             # Authentication module
 │   ├── users/            # User management module
-│   ├── images/           # Image generation module
-│   ├── billing/          # Billing and subscriptions
+│   ├── admin/            # Admin module
+│   ├── webapp/           # WebApp module
 │   └── health/           # Health checks
 ├── app.module.ts         # Root module
 └── main.ts              # Application entry point
