@@ -1,3 +1,4 @@
+import { ROUTES } from '../../common/constants';
 import {
   Controller,
   Post,
@@ -29,13 +30,13 @@ import { User } from '../../database/entities/user.entity';
 import { ResponseUtil } from '../../common/utils/response.util';
 
 @ApiTags('Authentication')
-@Controller('auth')
+@Controller(ROUTES.AUTH.BASE)
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
-  @Post('register')
+  @Post(ROUTES.AUTH.REGISTER)
   @RateLimit({ limit: 10, window: 60 * 15 }) // 10 requests per 15 minutes
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: RegisterDto })
@@ -54,7 +55,7 @@ export class AuthController {
   }
 
   @Public()
-  @Post('login')
+  @Post(ROUTES.AUTH.LOGIN)
   @RateLimit({ limit: 10, window: 60 * 15 }) // 10 requests per 15 minutes
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login user' })
@@ -75,7 +76,7 @@ export class AuthController {
 
   @Public()
   @UseGuards(JwtAuthGuard)
-  @Post('refresh')
+  @Post(ROUTES.AUTH.REFRESH)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiBody({ type: RefreshTokenDto })
@@ -93,7 +94,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('logout')
+  @Post(ROUTES.AUTH.LOGOUT)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout user' })
@@ -141,7 +142,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('profile')
+  @Get(ROUTES.AUTH.PROFILE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile with related data' })
   @ApiResponse({
@@ -155,7 +156,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('profile')
+  @Patch(ROUTES.AUTH.PROFILE)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update current user profile (partial update)' })

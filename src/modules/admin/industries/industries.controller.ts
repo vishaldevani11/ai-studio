@@ -1,3 +1,4 @@
+import { ROUTES } from '../../../common/constants';
 import {
   Controller,
   Get,
@@ -16,7 +17,7 @@ import { UpdateIndustryDto } from './dto/update-industry.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Admin - Industries')
-@Controller('admin/industries')
+@Controller(ROUTES.ADMIN.INDUSTRIES)
 export class IndustriesController {
   constructor(private readonly service: IndustriesService) {}
 

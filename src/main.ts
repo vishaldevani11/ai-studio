@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import * as compression from 'compression';
 import { AppModule } from './app.module';
 import { ValidationErrorUtil } from './common/utils/validation-error.util';
+import { API_PREFIX, API_VERSION, ROUTES } from './common/constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -50,13 +51,13 @@ async function bootstrap() {
   );
 
   // API versioning
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix(API_PREFIX);
 
   // Swagger documentation
   const config = new DocumentBuilder()
     .setTitle('SaaS Backend API')
     .setDescription('Production-ready SaaS backend boilerplate with NestJS')
-    .setVersion('1.0')
+    .setVersion(API_VERSION)
     .addBearerAuth(
       {
         type: 'http',
@@ -71,7 +72,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document, {
+  SwaggerModule.setup(`${API_PREFIX}/docs`, app, document, {
     swaggerOptions: {
       persistAuthorization: true,
     },
@@ -81,8 +82,8 @@ async function bootstrap() {
   await app.listen(port);
 
   console.log(`🚀 Application is running on: http://localhost:${port}`);
-  console.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
-  console.log(`🏥 Health check: http://localhost:${port}/api/v1/health`);
+  console.log(`📚 Swagger documentation: http://localhost:${port}/${API_PREFIX}/docs`);
+  console.log(`🏥 Health check: http://localhost:${port}/${API_PREFIX}/${ROUTES.HEALTH.BASE}`);
 }
 
 bootstrap();

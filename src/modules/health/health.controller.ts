@@ -1,10 +1,11 @@
+import { ROUTES } from '../../common/constants';
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator';
 import { ResponseUtil } from '../../common/utils/response.util';
 
 @ApiTags('Health')
-@Controller('health')
+@Controller(ROUTES.HEALTH.BASE)
 export class HealthController {
   @Public()
   @Get()

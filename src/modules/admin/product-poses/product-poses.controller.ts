@@ -1,3 +1,4 @@
+import { ROUTES } from '../../../common/constants';
 import { Controller, Get, Post, Body, Param, Query, Put, Patch } from '@nestjs/common';
 import { ProductPosesService } from './product-poses.service';
 import { CreateProductPoseDto } from './dto/create-product-pose.dto';
@@ -5,7 +6,7 @@ import { UpdateProductPoseDto } from './dto/update-product-pose.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Admin - Product Poses')
-@Controller('admin/poses')
+@Controller(ROUTES.ADMIN.PRODUCT_POSES)
 export class ProductPosesController {
   constructor(private readonly service: ProductPosesService) {}
 

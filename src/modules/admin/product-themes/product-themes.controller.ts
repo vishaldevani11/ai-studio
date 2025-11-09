@@ -1,3 +1,4 @@
+import { ROUTES } from '../../../common/constants';
 import { Controller, Get, Post, Body, Param, Put, Patch, Query } from '@nestjs/common';
 import { ProductThemesService } from './product-themes.service';
 import { CreateProductThemeDto } from './dto/create-product-theme.dto';
@@ -5,7 +6,7 @@ import { UpdateProductThemeDto } from './dto/update-product-theme.dto';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('Admin - Product Themes')
-@Controller('admin/product-themes')
+@Controller(ROUTES.ADMIN.PRODUCT_THEMES)
 export class ProductThemesController {
   constructor(private readonly service: ProductThemesService) {}
 

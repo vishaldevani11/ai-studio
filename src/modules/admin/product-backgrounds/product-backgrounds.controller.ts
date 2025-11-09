@@ -1,3 +1,4 @@
+import { ROUTES } from '../../../common/constants';
 import {
   Controller,
   Get,
@@ -16,7 +17,7 @@ import { UpdateProductBackgroundDto } from './dto/update-product-background.dto'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Admin - Product Backgrounds')
-@Controller('admin/product-backgrounds')
+@Controller(ROUTES.ADMIN.PRODUCT_BACKGROUNDS)
 export class ProductBackgroundsController {
   constructor(private readonly service: ProductBackgroundsService) {}
 

@@ -1,10 +1,11 @@
+import { ROUTES } from '../../../common/constants';
 import { Controller, Get, Post, Body, Param, Query, Put, Patch } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 @ApiTags('Admin - Categories')
-@Controller('admin/categories')
+@Controller(ROUTES.ADMIN.CATEGORIES)
 export class CategoriesController {
   constructor(private readonly service: CategoriesService) {}
 

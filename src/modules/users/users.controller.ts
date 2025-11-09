@@ -1,3 +1,4 @@
+import { ROUTES } from '../../common/constants';
 import {
   Controller,
   Get,
@@ -30,7 +31,7 @@ import { User, UserRole } from '../../database/entities/user.entity';
 import { ResponseUtil } from '../../common/utils/response.util';
 
 @ApiTags('Users')
-@Controller('users')
+@Controller(ROUTES.USERS.BASE)
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class UsersController {

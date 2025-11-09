@@ -13,17 +13,17 @@ export const ROUTES = {
     BASE: 'users',
     PROFILE: 'users/profile',
   },
-  IMAGES: {
-    BASE: 'images',
-    UPLOAD: 'images/upload',
-  },
-  BILLING: {
-    BASE: 'billing',
-    SUBSCRIPTION: 'billing/subscription',
-    WEBHOOK: 'billing/webhook',
-  },
   HEALTH: {
     BASE: 'health',
+  },
+  ADMIN: {
+    BASE: 'admin',
+    CATEGORIES: 'admin/categories',
+    INDUSTRIES: 'admin/industries',
+    PRODUCT_BACKGROUNDS: 'admin/product-backgrounds',
+    PRODUCT_POSES: 'admin/poses',
+    PRODUCT_THEMES: 'admin/product-themes',
+    PRODUCT_TYPES: 'admin/product-types',
   },
 } as const;
 
