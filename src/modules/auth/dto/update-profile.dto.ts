@@ -4,7 +4,6 @@ import {
   MaxLength,
   IsOptional,
   Matches,
-  IsBoolean,
   IsUrl,
   ValidateIf,
 } from 'class-validator';
@@ -35,14 +34,14 @@ export class UpdateProfileDto {
 
   @ApiPropertyOptional({
     description: 'User phone number',
-    example: '+1234567890',
+    example: '+911234567890',
     maxLength: 20,
   })
   @IsOptional()
   @IsString({ message: 'Phone number must be a string' })
   @MaxLength(20, { message: 'Phone number must not exceed 20 characters' })
-  @Matches(/^\+?[1-9]\d{1,14}$/, {
-    message: 'Please provide a valid phone number (E.164 format recommended)',
+  @Matches(/^\+91[6-9]\d{9}$/, {
+    message: 'Please provide a valid Indian phone number (e.g., +919876543210)',
   })
   phone?: string;
 
@@ -51,17 +50,9 @@ export class UpdateProfileDto {
     example: 'https://example.com/profile.jpg',
   })
   @IsOptional()
-  @ValidateIf((o) => o.profileImage !== undefined && o.profileImage !== null)
+  @ValidateIf(o => o.profileImage !== undefined && o.profileImage !== null)
   @IsUrl({}, { message: 'Please provide a valid profile image URL' })
   profileImage?: string;
-
-  @ApiPropertyOptional({
-    description: 'Subscribe to email notifications',
-    example: true,
-  })
-  @IsOptional()
-  @IsBoolean({ message: 'Email subscribed must be a boolean' })
-  emailSubscribed?: boolean;
 
   @ApiPropertyOptional({
     description: 'Referral code',
@@ -73,4 +64,3 @@ export class UpdateProfileDto {
   @MaxLength(50, { message: 'Referral code must not exceed 50 characters' })
   referralCode?: string;
 }
-

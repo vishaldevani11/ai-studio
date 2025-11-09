@@ -10,13 +10,7 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiBody,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -42,7 +36,7 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  @RateLimit({ limit: 10, window: 60 * 15 }) // 10 requests per 15 minutes 
+  @RateLimit({ limit: 10, window: 60 * 15 }) // 10 requests per 15 minutes
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({
@@ -61,7 +55,7 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  @RateLimit({ limit: 10, window: 60 * 15 }) // 10 requests per 15 minutes 
+  @RateLimit({ limit: 10, window: 60 * 15 }) // 10 requests per 15 minutes
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login user' })
   @ApiBody({ type: LoginDto })
@@ -124,10 +118,7 @@ export class AuthController {
   })
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     await this.authService.forgotPassword(forgotPasswordDto.email);
-    return ResponseUtil.success(
-      null,
-      'Password reset instructions sent if the email is valid',
-    );
+    return ResponseUtil.success(null, 'Password reset instructions sent if the email is valid');
   }
 
   @Public()
@@ -145,10 +136,7 @@ export class AuthController {
     description: 'Invalid or expired password reset token',
   })
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    await this.authService.resetPassword(
-      resetPasswordDto.token,
-      resetPasswordDto.newPassword,
-    );
+    await this.authService.resetPassword(resetPasswordDto.token, resetPasswordDto.newPassword);
     return ResponseUtil.success(null, 'Password has been successfully reset');
   }
 
@@ -163,10 +151,7 @@ export class AuthController {
   })
   async getProfile(@CurrentUser() user: User) {
     const userProfile = await this.authService.getProfile(user.id);
-    return ResponseUtil.success(
-      new ProfileDto(),
-      'Profile retrieved successfully',
-    );
+    return ResponseUtil.success(new ProfileDto(), 'Profile retrieved successfully');
   }
 
   @UseGuards(JwtAuthGuard)
@@ -184,18 +169,9 @@ export class AuthController {
     status: 409,
     description: 'Phone number already in use',
   })
-  async updateProfile(
-    @CurrentUser() user: User,
-    @Body() updateProfileDto: UpdateProfileDto,
-  ) {
-    const updatedUser = await this.authService.updateProfile(
-      user.id,
-      updateProfileDto,
-    );
-    return ResponseUtil.success(
-      new ProfileDto(),
-      'Profile updated successfully',
-    );
+  async updateProfile(@CurrentUser() user: User, @Body() updateProfileDto: UpdateProfileDto) {
+    const updatedUser = await this.authService.updateProfile(user.id, updateProfileDto);
+    return ResponseUtil.success(new ProfileDto(), 'Profile updated successfully');
   }
 
   @UseGuards(JwtAuthGuard)
@@ -212,10 +188,7 @@ export class AuthController {
     status: 400,
     description: 'Current password is incorrect or new password is same as current',
   })
-  async changePassword(
-    @CurrentUser() user: User,
-    @Body() changePasswordDto: ChangePasswordDto,
-  ) {
+  async changePassword(@CurrentUser() user: User, @Body() changePasswordDto: ChangePasswordDto) {
     await this.authService.changePassword(
       user.id,
       changePasswordDto.currentPassword,

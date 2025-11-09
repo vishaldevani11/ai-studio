@@ -20,9 +20,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         synchronize: configService.get('app.nodeEnv') === 'development',
         logging: configService.get('app.nodeEnv') === 'development',
         ssl:
-          configService.get('app.nodeEnv') === 'production'
-            ? { rejectUnauthorized: false }
-            : false,
+          configService.get('app.nodeEnv') === 'production' ? { rejectUnauthorized: false } : false,
       }),
       inject: [ConfigService],
     }),

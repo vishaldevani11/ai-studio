@@ -16,7 +16,9 @@ export class ProductBackgroundsService {
   ) {}
 
   async create(dto: CreateProductBackgroundDto) {
-    const productThemes = dto.productThemeIds ? await this.productThemeRepo.findByIds(dto.productThemeIds) : [];
+    const productThemes = dto.productThemeIds
+      ? await this.productThemeRepo.findByIds(dto.productThemeIds)
+      : [];
 
     if (!dto.imageUrl) throw new BadRequestException('Image URL is required');
 

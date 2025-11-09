@@ -9,7 +9,9 @@ import { ProductBackground } from '../admin/product-backgrounds/product-backgrou
 import { ProductTheme } from '../admin/product-themes/product-theme.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Industry, Category, ProductType,ProductTheme,ProductBackground])],
+  imports: [
+    TypeOrmModule.forFeature([Industry, Category, ProductType, ProductTheme, ProductBackground]),
+  ],
   controllers: [WebAppController],
   providers: [WebAppService],
 })

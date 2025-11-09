@@ -53,14 +53,21 @@ export class UserBusiness extends BaseEntity {
   @Column({ name: 'business_logo', type: 'text', nullable: true })
   businessLogo: string;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone', default: () => 'NOW()' })
+  @CreateDateColumn({
+    name: 'created_at',
+    type: 'timestamp with time zone',
+    default: () => 'NOW()',
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone', default: () => 'NOW()' })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamp with time zone',
+    default: () => 'NOW()',
+  })
   updatedAt: Date;
 
-  @OneToOne(() => User, (user) => user.business, { onDelete: 'CASCADE' })
+  @OneToOne(() => User, user => user.business, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }
-

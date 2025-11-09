@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,7 +10,7 @@ export class LoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
-    
+
     // Generate request ID for correlation
     const requestId = uuidv4();
     request.requestId = requestId;
@@ -26,9 +20,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const userAgent = request.get('User-Agent') || '';
     const startTime = Date.now();
 
-    this.logger.log(
-      `[${requestId}] ${method} ${url} - ${ip} - ${userAgent}`,
-    );
+    this.logger.log(`[${requestId}] ${method} ${url} - ${ip} - ${userAgent}`);
 
     return next.handle().pipe(
       tap(() => {

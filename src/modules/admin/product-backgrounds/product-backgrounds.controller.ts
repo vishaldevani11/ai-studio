@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Query, Put, Patch, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Put,
+  Patch,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ProductBackgroundsService } from './product-backgrounds.service';
 import { CreateProductBackgroundDto } from './dto/create-product-background.dto';
 import { UpdateProductBackgroundDto } from './dto/update-product-background.dto';
@@ -10,12 +21,14 @@ export class ProductBackgroundsController {
   constructor(private readonly service: ProductBackgroundsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all product backgrounds (optionally filter by product theme or search)' })
+  @ApiOperation({
+    summary: 'Get all product backgrounds (optionally filter by product theme or search)',
+  })
   @ApiResponse({ status: 200, description: 'Product backgrounds retrieved successfully' })
   findAll(@Query('search') search?: string, @Query('productThemeId') productThemeId?: string) {
     return this.service.findAll(search, productThemeId);
   }
-  @HttpCode(HttpStatus.OK)      
+  @HttpCode(HttpStatus.OK)
   @Get(':id')
   @ApiOperation({ summary: 'Get a product background by ID' })
   @ApiResponse({ status: 200, description: 'Product background retrieved successfully' })

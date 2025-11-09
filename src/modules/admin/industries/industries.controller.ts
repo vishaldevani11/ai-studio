@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Query, Put, Patch, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Put,
+  Patch,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { IndustriesService } from './industries.service';
 import { CreateIndustryDto } from './dto/create-industry.dto';
 import { UpdateIndustryDto } from './dto/update-industry.dto';

@@ -24,11 +24,10 @@ export class ValidationErrorUtil {
    */
   static format(errors: ValidationError[]): FormattedValidationError {
     const formattedErrors = this.formatErrors(errors);
-    
+
     const errorCount = formattedErrors.length;
-    const message = errorCount === 1
-      ? 'Validation failed'
-      : `Validation failed: ${errorCount} error(s) found`;
+    const message =
+      errorCount === 1 ? 'Validation failed' : `Validation failed: ${errorCount} error(s) found`;
 
     return {
       message,
@@ -48,7 +47,7 @@ export class ValidationErrorUtil {
 
     for (const error of errors) {
       const fieldPath = parentPath ? `${parentPath}.${error.property}` : error.property;
-      
+
       const errorDetail: ValidationErrorDetail = {
         field: fieldPath,
         value: error.value !== undefined ? error.value : null,
@@ -78,9 +77,9 @@ export class ValidationErrorUtil {
     const extractMessages = (errorList: ValidationError[], path: string = '') => {
       for (const error of errorList) {
         const fieldPath = path ? `${path}.${error.property}` : error.property;
-        
+
         if (error.constraints) {
-          Object.values(error.constraints).forEach((message) => {
+          Object.values(error.constraints).forEach(message => {
             messages.push(`${fieldPath}: ${message}`);
           });
         }
@@ -104,8 +103,7 @@ export class ValidationErrorUtil {
       return 'No validation errors';
     }
 
-    const fieldNames = formatted.errors.map((e) => e.field).join(', ');
+    const fieldNames = formatted.errors.map(e => e.field).join(', ');
     return `${formatted.message}. Fields: ${fieldNames}`;
   }
 }
-

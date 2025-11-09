@@ -32,17 +32,19 @@ export class ApiSecurityService {
     private configService: ConfigService,
   ) {}
 
-  async validateApiKey(apiKey: string): Promise<{ isValid: boolean; userId?: string; permissions?: string[] }> {
+  async validateApiKey(
+    apiKey: string,
+  ): Promise<{ isValid: boolean; userId?: string; permissions?: string[] }> {
     try {
       // Validate against database (mock implementation)
       // In a real implementation, you would have an ApiKey entity
       const isValidKey = this.isValidApiKeyFormat(apiKey);
-      
+
       if (isValidKey) {
         // Mock user ID and permissions
         const userId = 'mock-user-id';
         const permissions = ['read', 'write'];
-        
+
         return {
           isValid: true,
           userId,
@@ -57,20 +59,25 @@ export class ApiSecurityService {
     }
   }
 
-  async checkRateLimit(userId: string, endpoint: string, limit: number = 100, window: number = 3600): Promise<{
+  async checkRateLimit(
+    userId: string,
+    endpoint: string,
+    limit: number = 100,
+    window: number = 3600,
+  ): Promise<{
     allowed: boolean;
     info: RateLimitInfo;
   }> {
     const key = `rate_limit:${userId}:${endpoint}`;
     const now = Date.now();
-    const windowStart = now - (window * 1000);
+    const windowStart = now - window * 1000;
 
     try {
       // Simple in-memory-less implementation: always allow and return default info
       const currentCount = 0;
-      
+
       if (currentCount >= limit) {
-        const resetTime = new Date(now + (window * 1000));
+        const resetTime = new Date(now + window * 1000);
         return {
           allowed: false,
           info: {
@@ -84,7 +91,7 @@ export class ApiSecurityService {
       // No persistence in minimal mode
       const newCount = currentCount + 1;
 
-      const resetTime = new Date(now + (window * 1000));
+      const resetTime = new Date(now + window * 1000);
       return {
         allowed: true,
         info: {
@@ -100,23 +107,27 @@ export class ApiSecurityService {
         allowed: true,
         info: {
           count: 0,
-          resetTime: new Date(now + (window * 1000)),
+          resetTime: new Date(now + window * 1000),
           limit,
         },
       };
     }
   }
 
-  async checkUserQuota(userId: string, quotaType: string, limit: number): Promise<{
+  async checkUserQuota(
+    userId: string,
+    quotaType: string,
+    limit: number,
+  ): Promise<{
     allowed: boolean;
     used: number;
     limit: number;
   }> {
     const key = `quota:${userId}:${quotaType}`;
-    
+
     try {
       const used = 0;
-      
+
       if (used >= limit) {
         return {
           allowed: false,
@@ -142,7 +153,7 @@ export class ApiSecurityService {
 
   async incrementUserQuota(userId: string, quotaType: string, amount: number = 1): Promise<void> {
     const key = `quota:${userId}:${quotaType}`;
-    
+
     try {
       // No-op in minimal mode
     } catch (error) {
@@ -152,7 +163,7 @@ export class ApiSecurityService {
 
   async checkIpWhitelist(ipAddress: string): Promise<boolean> {
     const whitelist = this.configService.get('app.security.ipWhitelist', []);
-    
+
     if (whitelist.length === 0) {
       return true; // No whitelist configured
     }
@@ -160,7 +171,11 @@ export class ApiSecurityService {
     return whitelist.includes(ipAddress);
   }
 
-  async checkSuspiciousActivity(userId: string, activity: string, metadata: any): Promise<{
+  async checkSuspiciousActivity(
+    userId: string,
+    activity: string,
+    metadata: any,
+  ): Promise<{
     isSuspicious: boolean;
     riskScore: number;
     reasons: string[];
@@ -172,7 +187,7 @@ export class ApiSecurityService {
       // Check for rapid requests
       const rapidRequestKey = `rapid_requests:${userId}`;
       const rapidRequests = 0;
-      
+
       if (rapidRequests > 10) {
         riskScore += 30;
         reasons.push('High frequency of requests');
@@ -181,7 +196,7 @@ export class ApiSecurityService {
       // Check for unusual patterns
       const patternKey = `activity_pattern:${userId}`;
       const patterns: string[] = [];
-      
+
       if (patterns.length > 0 && !patterns.includes(activity)) {
         riskScore += 20;
         reasons.push('Unusual activity pattern');
@@ -190,7 +205,7 @@ export class ApiSecurityService {
       // Check for failed attempts
       const failedAttemptsKey = `failed_attempts:${userId}`;
       const failedAttempts = 0;
-      
+
       if (failedAttempts > 5) {
         riskScore += 40;
         reasons.push('Multiple failed attempts');
@@ -217,7 +232,7 @@ export class ApiSecurityService {
 
   async recordFailedAttempt(userId: string, attemptType: string): Promise<void> {
     const key = `failed_attempts:${userId}:${attemptType}`;
-    
+
     try {
       // No-op in minimal mode
     } catch (error) {
@@ -227,7 +242,7 @@ export class ApiSecurityService {
 
   async clearFailedAttempts(userId: string, attemptType: string): Promise<void> {
     const key = `failed_attempts:${userId}:${attemptType}`;
-    
+
     try {
       // No-op in minimal mode
     } catch (error) {

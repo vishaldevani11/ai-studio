@@ -186,10 +186,18 @@ export class InitialMigration1700000000000 implements MigrationInterface {
     await queryRunner.query(`CREATE INDEX "idx_users_role" ON "users" ("role")`);
     await queryRunner.query(`CREATE INDEX "IDX_images_userId" ON "images" ("userId")`);
     await queryRunner.query(`CREATE INDEX "IDX_images_isPublic" ON "images" ("isPublic")`);
-    await queryRunner.query(`CREATE INDEX "IDX_subscriptions_userId" ON "subscriptions" ("userId")`);
-    await queryRunner.query(`CREATE INDEX "IDX_subscriptions_status" ON "subscriptions" ("status")`);
-    await queryRunner.query(`CREATE INDEX "idx_user_business_user_id" ON "user_businesses" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_user_subscription_user_id" ON "user_subscriptions" ("user_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_subscriptions_userId" ON "subscriptions" ("userId")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_subscriptions_status" ON "subscriptions" ("status")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_user_business_user_id" ON "user_businesses" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_user_subscription_user_id" ON "user_subscriptions" ("user_id")`,
+    );
 
     // Create trigger function for auto-updating updated_at
     await queryRunner.query(`
@@ -214,7 +222,7 @@ export class InitialMigration1700000000000 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Drop triggers
     await queryRunner.query(`DROP TRIGGER IF EXISTS set_timestamp ON users`);
-    
+
     // Drop trigger function
     await queryRunner.query(`DROP FUNCTION IF EXISTS update_updated_at_column()`);
 
@@ -229,10 +237,18 @@ export class InitialMigration1700000000000 implements MigrationInterface {
     await queryRunner.query(`DROP INDEX "idx_users_email"`);
 
     // Drop foreign key constraints
-    await queryRunner.query(`ALTER TABLE "user_subscriptions" DROP CONSTRAINT IF EXISTS "FK_user_subscriptions_user_id"`);
-    await queryRunner.query(`ALTER TABLE "user_businesses" DROP CONSTRAINT IF EXISTS "FK_user_businesses_user_id"`);
-    await queryRunner.query(`ALTER TABLE "user_addresses" DROP CONSTRAINT IF EXISTS "FK_user_addresses_user_id"`);
-    await queryRunner.query(`ALTER TABLE "subscriptions" DROP CONSTRAINT "FK_subscriptions_userId"`);
+    await queryRunner.query(
+      `ALTER TABLE "user_subscriptions" DROP CONSTRAINT IF EXISTS "FK_user_subscriptions_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user_businesses" DROP CONSTRAINT IF EXISTS "FK_user_businesses_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user_addresses" DROP CONSTRAINT IF EXISTS "FK_user_addresses_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "subscriptions" DROP CONSTRAINT "FK_subscriptions_userId"`,
+    );
     await queryRunner.query(`ALTER TABLE "images" DROP CONSTRAINT "FK_images_userId"`);
 
     // Drop tables

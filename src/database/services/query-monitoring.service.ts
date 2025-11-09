@@ -7,29 +7,23 @@ export class QueryMonitoringService {
 
   async logSlowQuery(query: string, duration: number, parameters?: any[]): Promise<void> {
     if (duration > this.slowQueryThreshold) {
-      this.logger.warn(
-        `Slow query detected: ${query} (${duration}ms)`,
-        {
-          query: this.sanitizeQuery(query),
-          duration,
-          parameters: this.sanitizeParameters(parameters),
-          timestamp: new Date().toISOString(),
-        }
-      );
+      this.logger.warn(`Slow query detected: ${query} (${duration}ms)`, {
+        query: this.sanitizeQuery(query),
+        duration,
+        parameters: this.sanitizeParameters(parameters),
+        timestamp: new Date().toISOString(),
+      });
     }
   }
 
   async logQueryError(query: string, error: Error, parameters?: any[]): Promise<void> {
-    this.logger.error(
-      `Query error: ${error.message}`,
-      {
-        query: this.sanitizeQuery(query),
-        error: error.message,
-        stack: error.stack,
-        parameters: this.sanitizeParameters(parameters),
-        timestamp: new Date().toISOString(),
-      }
-    );
+    this.logger.error(`Query error: ${error.message}`, {
+      query: this.sanitizeQuery(query),
+      error: error.message,
+      stack: error.stack,
+      parameters: this.sanitizeParameters(parameters),
+      timestamp: new Date().toISOString(),
+    });
   }
 
   private sanitizeQuery(query: string): string {
@@ -42,7 +36,7 @@ export class QueryMonitoringService {
 
   private sanitizeParameters(parameters?: any[]): any[] {
     if (!parameters) return [];
-    
+
     return parameters.map(param => {
       if (typeof param === 'string') {
         // Check if parameter looks like sensitive data

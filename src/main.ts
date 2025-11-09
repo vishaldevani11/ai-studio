@@ -36,9 +36,9 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true,
       },
-      exceptionFactory: (errors) => {
+      exceptionFactory: errors => {
         const formattedErrors = ValidationErrorUtil.format(errors);
-        
+
         // Return BadRequestException with formatted error structure
         return new BadRequestException({
           message: formattedErrors.message,

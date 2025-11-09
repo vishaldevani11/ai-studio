@@ -14,17 +14,17 @@ export const getDatabaseConfig = (configService: ConfigService): TypeOrmModuleOp
   synchronize: configService.get('app.nodeEnv') === 'development',
   logging: configService.get('app.nodeEnv') === 'development',
   ssl: configService.get('app.nodeEnv') === 'production' ? { rejectUnauthorized: false } : false,
-  
+
   // Connection pooling configuration
   extra: {
     max: 20, // Maximum connections
-    min: 5,  // Minimum connections
+    min: 5, // Minimum connections
     acquire: 30000, // Connection acquire timeout
-    idle: 10000,    // Connection idle timeout
-    evict: 1000,    // Connection eviction interval
+    idle: 10000, // Connection idle timeout
+    evict: 1000, // Connection eviction interval
     handleDisconnects: true,
   },
-  
+
   // Query optimization
   cache: {
     type: 'redis',
@@ -36,8 +36,9 @@ export const getDatabaseConfig = (configService: ConfigService): TypeOrmModuleOp
     },
     duration: 30000, // Cache duration in milliseconds
   },
-  
+
   // Performance optimizations
   maxQueryExecutionTime: 1000, // Log slow queries
-  logger: configService.get('app.nodeEnv') === 'development' ? 'advanced-console' : 'simple-console',
+  logger:
+    configService.get('app.nodeEnv') === 'development' ? 'advanced-console' : 'simple-console',
 });

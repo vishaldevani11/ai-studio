@@ -17,7 +17,11 @@ export interface ErrorContext {
 export class ErrorTrackingService {
   private readonly logger = new Logger(ErrorTrackingService.name);
   private readonly errorCounts = new Map<ErrorCode, number>();
-  private readonly recentErrors: Array<{ error: BusinessError; context: ErrorContext; timestamp: Date }> = [];
+  private readonly recentErrors: Array<{
+    error: BusinessError;
+    context: ErrorContext;
+    timestamp: Date;
+  }> = [];
 
   async trackError(error: BusinessError, context: ErrorContext = {}): Promise<void> {
     const errorContext: ErrorContext = {
@@ -26,13 +30,10 @@ export class ErrorTrackingService {
     };
 
     // Log error with context
-    this.logger.error(
-      `Business Error: ${error.code} - ${error.message}`,
-      {
-        error: error.toJSON(),
-        context: errorContext,
-      }
-    );
+    this.logger.error(`Business Error: ${error.code} - ${error.message}`, {
+      error: error.toJSON(),
+      context: errorContext,
+    });
 
     // Update error counts
     const currentCount = this.errorCounts.get(error.code) || 0;
@@ -52,12 +53,9 @@ export class ErrorTrackingService {
   }
 
   async trackSystemError(error: Error, context: ErrorContext = {}): Promise<void> {
-    const businessError = new BusinessError(
-      ErrorCode.INTERNAL_SERVER_ERROR,
-      error.message,
-      500,
-      { originalError: error.name }
-    );
+    const businessError = new BusinessError(ErrorCode.INTERNAL_SERVER_ERROR, error.message, 500, {
+      originalError: error.name,
+    });
 
     await this.trackError(businessError, {
       ...context,
@@ -71,7 +69,10 @@ export class ErrorTrackingService {
     recentErrors: Array<{ code: string; message: string; timestamp: Date }>;
     errorRate: number;
   }> {
-    const totalErrors = Array.from(this.errorCounts.values()).reduce((sum, count) => sum + count, 0);
+    const totalErrors = Array.from(this.errorCounts.values()).reduce(
+      (sum, count) => sum + count,
+      0,
+    );
     const errorCounts = Object.fromEntries(this.errorCounts);
     const recentErrors = this.recentErrors.slice(-10).map(({ error, timestamp }) => ({
       code: error.code,
@@ -82,7 +83,7 @@ export class ErrorTrackingService {
     // Calculate error rate (errors per minute)
     const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
     const recentErrorCount = this.recentErrors.filter(
-      ({ timestamp }) => timestamp > oneMinuteAgo
+      ({ timestamp }) => timestamp > oneMinuteAgo,
     ).length;
 
     return {
@@ -93,11 +94,13 @@ export class ErrorTrackingService {
     };
   }
 
-  async getErrorTrends(timeWindow: number = 3600): Promise<Array<{
-    timestamp: Date;
-    errorCount: number;
-    errorTypes: Record<string, number>;
-  }>> {
+  async getErrorTrends(timeWindow: number = 3600): Promise<
+    Array<{
+      timestamp: Date;
+      errorCount: number;
+      errorTypes: Record<string, number>;
+    }>
+  > {
     // This would typically query a time-series database
     // For now, return mock data
     return [];
@@ -107,7 +110,7 @@ export class ErrorTrackingService {
     try {
       // Integration with external monitoring services
       // Example: Sentry, DataDog, New Relic, etc.
-      
+
       // Mock implementation
       if (process.env.NODE_ENV === 'production') {
         // await sentry.captureException(error, { extra: context });
@@ -124,9 +127,9 @@ export class ErrorTrackingService {
 
     if (errorCount > threshold) {
       this.logger.warn(
-        `Error rate alert: ${errorCode} has occurred ${errorCount} times (threshold: ${threshold})`
+        `Error rate alert: ${errorCode} has occurred ${errorCount} times (threshold: ${threshold})`,
       );
-      
+
       // Send alert to monitoring system
       await this.sendAlert(errorCode, errorCount, threshold);
     }
@@ -149,7 +152,7 @@ export class ErrorTrackingService {
   private async sendAlert(errorCode: ErrorCode, count: number, threshold: number): Promise<void> {
     // Send alert to monitoring system (PagerDuty, Slack, etc.)
     this.logger.warn(
-      `ALERT: ${errorCode} exceeded threshold. Count: ${count}, Threshold: ${threshold}`
+      `ALERT: ${errorCode} exceeded threshold. Count: ${count}, Threshold: ${threshold}`,
     );
   }
 

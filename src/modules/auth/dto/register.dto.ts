@@ -5,7 +5,6 @@ import {
   MaxLength,
   IsOptional,
   Matches,
-  IsBoolean,
   ValidateIf,
   ValidateNested,
   IsObject,
@@ -14,7 +13,6 @@ import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AddressDto } from './address.dto';
 import { BusinessDto } from './business.dto';
-import { SubscriptionDto } from './subscription.dto';
 
 export class RegisterDto {
   @ApiProperty({
@@ -23,6 +21,9 @@ export class RegisterDto {
     maxLength: 150,
   })
   @IsEmail({}, { message: 'Please provide a valid email address' })
+  @Matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, {
+    message: 'Please provide a valid email address',
+  })
   @MaxLength(150, { message: 'Email must not exceed 150 characters' })
   email: string;
 
@@ -35,13 +36,10 @@ export class RegisterDto {
   @IsString({ message: 'Password must be a string' })
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
   @MaxLength(100, { message: 'Password must not exceed 100 characters' })
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-    {
-      message:
-        'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-    },
-  )
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message:
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+  })
   password: string;
 
   @ApiProperty({
@@ -63,30 +61,21 @@ export class RegisterDto {
   @IsOptional()
   @IsString({ message: 'Last name must be a string' })
   @MaxLength(100, { message: 'Last name must not exceed 100 characters' })
-  @ValidateIf((o) => o.lastName !== undefined && o.lastName !== null)
+  @ValidateIf(o => o.lastName !== undefined && o.lastName !== null)
   lastName?: string;
 
   @ApiPropertyOptional({
     description: 'User phone number',
-    example: '+1234567890',
+    example: '+911234567890',
     maxLength: 20,
   })
   @IsOptional()
   @IsString({ message: 'Phone number must be a string' })
   @MaxLength(20, { message: 'Phone number must not exceed 20 characters' })
-  @Matches(/^\+?[1-9]\d{1,14}$/, {
-    message: 'Please provide a valid phone number (E.164 format recommended)',
+  @Matches(/^\+91[6-9]\d{9}$/, {
+    message: 'Please provide a valid Indian phone number (e.g., +919876543210)',
   })
   phone?: string;
-
-  @ApiPropertyOptional({
-    description: 'Subscribe to email notifications',
-    example: false,
-    default: false,
-  })
-  @IsOptional()
-  @IsBoolean({ message: 'Email subscribed must be a boolean' })
-  emailSubscribed?: boolean;
 
   @ApiPropertyOptional({
     description: 'User address information',
@@ -107,14 +96,4 @@ export class RegisterDto {
   @ValidateNested({ message: 'Business validation failed' })
   @Type(() => BusinessDto)
   business?: BusinessDto;
-
-  @ApiPropertyOptional({
-    description: 'Subscription information',
-    type: SubscriptionDto,
-  })
-  @IsOptional()
-  @IsObject({ message: 'Subscription must be an object' })
-  @ValidateNested({ message: 'Subscription validation failed' })
-  @Type(() => SubscriptionDto)
-  subscription?: SubscriptionDto;
 }

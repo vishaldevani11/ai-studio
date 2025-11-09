@@ -40,10 +40,7 @@ import { WebAppModule } from './modules/webapp/webapp.module';
       isGlobal: true,
       load: [configuration],
       validationSchema,
-      envFilePath: [
-        `env.${process.env.NODE_ENV || 'development'}`,
-        '.env',
-      ],
+      envFilePath: [`env.${process.env.NODE_ENV || 'development'}`, '.env'],
     }),
 
     // Event system
@@ -60,10 +57,12 @@ import { WebAppModule } from './modules/webapp/webapp.module';
     // Rate limiting
     ThrottlerModule.forRootAsync({
       useFactory: () => ({
-        throttlers: [{
-          ttl: parseInt(process.env.THROTTLE_TTL, 10) || 60,
-          limit: parseInt(process.env.THROTTLE_LIMIT, 10) || 100,
-        }],
+        throttlers: [
+          {
+            ttl: parseInt(process.env.THROTTLE_TTL, 10) || 60,
+            limit: parseInt(process.env.THROTTLE_LIMIT, 10) || 100,
+          },
+        ],
       }),
     }),
 

@@ -31,9 +31,9 @@ export class Image extends BaseEntity {
   @Column({ default: false })
   isPublic: boolean;
 
- // @ManyToOne(() => User, (user) => user.images, { onDelete: 'CASCADE' })
- // @JoinColumn({ name: 'userId' })
- // user: User;
+  // @ManyToOne(() => User, (user) => user.images, { onDelete: 'CASCADE' })
+  // @JoinColumn({ name: 'userId' })
+  // user: User;
 
   @Column()
   userId: string;

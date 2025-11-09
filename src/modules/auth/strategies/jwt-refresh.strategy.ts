@@ -7,10 +7,7 @@ import { User } from '../../../database/entities/user.entity';
 import { AuthService } from '../auth.service';
 
 @Injectable()
-export class JwtRefreshStrategy extends PassportStrategy(
-  Strategy,
-  'jwt-refresh',
-) {
+export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   constructor(
     private configService: ConfigService,
     private authService: AuthService,
@@ -18,7 +15,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('auth.jwtRefreshSecret'),
+      secretOrKey: configService.get<string>('app.jwt.refreshSecret'), // ⭐ FIXED
       passReqToCallback: true,
     });
   }
@@ -27,17 +24,11 @@ export class JwtRefreshStrategy extends PassportStrategy(
     const refreshToken = req.body.refreshToken;
     const user = await this.authService.validateUserById(payload.sub);
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid user');
-    }
-
-    if (user.refreshToken !== refreshToken) {
+    if (!user) throw new UnauthorizedException('Invalid user');
+    if (user.refreshToken !== refreshToken)
       throw new UnauthorizedException('Invalid refresh token');
-    }
-
-    if (user.refreshTokenExpires < new Date()) {
-      throw new UnauthorizedException('Refresh token has expired');
-    }
+    if (user.refreshTokenExpires < new Date())
+      throw new UnauthorizedException('Refresh token expired');
 
     return user;
   }

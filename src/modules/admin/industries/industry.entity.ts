@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
 import { Category } from '../categories/category.entity';
 
 @Entity('industries')
@@ -13,7 +21,7 @@ export class Industry {
   @Column({ nullable: true, type: 'text' })
   description?: string;
 
-  @OneToMany(() => Category, (category) => category.industry, { cascade: true })
+  @OneToMany(() => Category, category => category.industry, { cascade: true })
   categories: Category[];
 
   @Column({ name: 'is_deleted', default: false })

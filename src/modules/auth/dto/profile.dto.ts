@@ -2,8 +2,7 @@ import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { AddressDto } from './address.dto';
 import { BusinessDto } from './business.dto';
-import { SubscriptionDto } from './subscription.dto';
-import { UserStatus , UserRole } from '@/database/entities/user.entity';
+import { UserStatus, UserRole } from '@/database/entities/user.entity';
 
 export class ProfileDto {
   @ApiProperty({ description: "User's unique identifier" })
@@ -42,10 +41,6 @@ export class ProfileDto {
   @Expose()
   phoneVerified: boolean;
 
-  @ApiProperty({ description: 'Indicates if the user is subscribed to emails' })
-  @Expose()
-  emailSubscribed: boolean;
-
   @ApiProperty({ description: 'URL of the profile image', required: false })
   @Expose()
   profileImage?: string;
@@ -71,13 +66,12 @@ export class ProfileDto {
   @Type(() => AddressDto)
   addresses: AddressDto[];
 
-  @ApiProperty({ type: () => BusinessDto, description: "User's business information", required: false })
+  @ApiProperty({
+    type: () => BusinessDto,
+    description: "User's business information",
+    required: false,
+  })
   @Expose()
   @Type(() => BusinessDto)
   business?: BusinessDto;
-
-  @ApiProperty({ type: () => [SubscriptionDto], description: "User's subscriptions" })
-  @Expose()
-  @Type(() => SubscriptionDto)
-  subscriptions: SubscriptionDto[];
 }

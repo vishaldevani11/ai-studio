@@ -14,7 +14,6 @@ import * as crypto from 'crypto';
 import { User, UserRole, UserStatus } from '../../database/entities/user.entity';
 import { UserAddress } from '../../database/entities/user-address.entity';
 import { UserBusiness } from '../../database/entities/user-business.entity';
-import { UserSubscription, SubscriptionPlan, SubscriptionStatus } from '../../database/entities/user-subscription.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -29,8 +28,6 @@ export class AuthService {
     private userAddressRepository: Repository<UserAddress>,
     @InjectRepository(UserBusiness)
     private userBusinessRepository: Repository<UserBusiness>,
-    @InjectRepository(UserSubscription)
-    private userSubscriptionRepository: Repository<UserSubscription>,
     @InjectDataSource()
     private dataSource: DataSource,
     private jwtService: JwtService,
@@ -38,17 +35,7 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
-    const {
-      email,
-      password,
-      firstName,
-      lastName,
-      phone,
-      emailSubscribed,
-      address,
-      business,
-      subscription,
-    } = registerDto;
+    const { email, password, firstName, lastName, phone, address, business } = registerDto;
 
     // Check if user already exists
     const existingUser = await this.userRepository.findOne({
@@ -86,7 +73,6 @@ export class AuthService {
         firstName,
         lastName: lastName || null,
         phone: phone || null,
-        emailSubscribed: emailSubscribed ?? false,
         emailVerified: false,
         phoneVerified: false,
         role: UserRole.USER,
@@ -123,24 +109,6 @@ export class AuthService {
         });
         await queryRunner.manager.save(UserBusiness, userBusiness);
       }
-
-      // Create subscription (default to free trial if not provided)
-      const subscriptionData = subscription || {};
-      const userSubscription = this.userSubscriptionRepository.create({
-        userId: savedUser.id,
-        plan: subscriptionData.plan || SubscriptionPlan.FREE,
-        status: subscriptionData.status || SubscriptionStatus.TRIAL,
-        startDate: subscriptionData.startDate
-          ? new Date(subscriptionData.startDate)
-          : new Date(),
-        endDate: subscriptionData.endDate
-          ? new Date(subscriptionData.endDate)
-          : null,
-        autoRenew: subscriptionData.autoRenew ?? true,
-        paymentMethod: subscriptionData.paymentMethod || null,
-        creditsRemaining: subscriptionData.creditsRemaining ?? 0,
-      });
-      await queryRunner.manager.save(UserSubscription, userSubscription);
 
       // Commit transaction
       await queryRunner.commitTransaction();
@@ -291,14 +259,10 @@ export class AuthService {
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
-    const passwordResetToken = crypto
-      .createHash('sha256')
-      .update(resetToken)
-      .digest('hex');
+    const passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
     const passwordResetExpires = new Date(
-      Date.now() +
-        this.configService.get<number>('auth.passwordResetTokenExpiresIn'),
+      Date.now() + this.configService.get<number>('auth.passwordResetTokenExpiresIn'),
     );
 
     await this.userRepository.update(user.id, {
@@ -312,10 +276,7 @@ export class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
-    const passwordResetToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const passwordResetToken = crypto.createHash('sha256').update(token).digest('hex');
 
     const user = await this.userRepository.findOne({
       where: {
@@ -333,9 +294,7 @@ export class AuthService {
 
     const isSamePassword = await bcrypt.compare(newPassword, user.passwordHash);
     if (isSamePassword) {
-      throw new BadRequestException(
-        'New password must be different from the current password',
-      );
+      throw new BadRequestException('New password must be different from the current password');
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 12);
@@ -355,7 +314,7 @@ export class AuthService {
   async getProfile(userId: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['addresses', 'business', 'subscriptions'],
+      relations: ['addresses', 'business'],
     });
 
     if (!user) {
@@ -365,10 +324,7 @@ export class AuthService {
     return user;
   }
 
-  async updateProfile(
-    userId: string,
-    updateProfileDto: UpdateProfileDto,
-  ): Promise<User> {
+  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
@@ -379,7 +335,7 @@ export class AuthService {
 
     // Only update fields that are provided (partial update)
     const updateData: Partial<User> = {};
-    
+
     if (updateProfileDto.firstName !== undefined) {
       updateData.firstName = updateProfileDto.firstName;
     }
@@ -402,9 +358,7 @@ export class AuthService {
     if (updateProfileDto.profileImage !== undefined) {
       updateData.profileImage = updateProfileDto.profileImage || null;
     }
-    if (updateProfileDto.emailSubscribed !== undefined) {
-      updateData.emailSubscribed = updateProfileDto.emailSubscribed;
-    }
+
     if (updateProfileDto.referralCode !== undefined) {
       updateData.referralCode = updateProfileDto.referralCode || null;
     }
@@ -415,7 +369,7 @@ export class AuthService {
     // Return updated user
     const updatedUser = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['addresses', 'business', 'subscriptions'],
+      relations: ['addresses', 'business'],
     });
 
     return updatedUser;
@@ -435,10 +389,7 @@ export class AuthService {
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(
-      currentPassword,
-      user.passwordHash,
-    );
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
 
     if (!isCurrentPasswordValid) {
       throw new BadRequestException('Current password is incorrect');
@@ -486,7 +437,7 @@ export class AuthService {
   private async updateRefreshToken(userId: string, refreshToken: string): Promise<void> {
     const expiresIn = this.configService.get<string>('auth.jwtRefreshExpiresIn');
     const expiresAt = new Date();
-    
+
     // Parse expires in (e.g., '7d', '15m')
     if (expiresIn.endsWith('d')) {
       expiresAt.setDate(expiresAt.getDate() + parseInt(expiresIn));

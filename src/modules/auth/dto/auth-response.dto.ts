@@ -28,7 +28,7 @@ export class UserInfoDto {
 
   @ApiPropertyOptional({
     description: 'User phone number',
-    example: '+1234567890',
+    example: '+911234567890',
   })
   phone?: string;
 
@@ -124,7 +124,7 @@ export class UserResponseDto {
 
   @ApiPropertyOptional({
     description: 'User phone number',
-    example: '+1234567890',
+    example: '+911234567890',
   })
   phone?: string;
 

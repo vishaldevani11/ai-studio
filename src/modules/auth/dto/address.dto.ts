@@ -65,4 +65,3 @@ export class AddressDto {
   @MaxLength(100, { message: 'Country must not exceed 100 characters' })
   country?: string;
 }
-

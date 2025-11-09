@@ -7,7 +7,10 @@ export class CreateProductBackgroundDto {
   @Length(2, 100)
   name: string;
 
-  @ApiProperty({ example: 'A high-quality forest image for outdoor-themed product backgrounds', required: false })
+  @ApiProperty({
+    example: 'A high-quality forest image for outdoor-themed product backgrounds',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   description?: string;

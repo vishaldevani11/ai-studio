@@ -7,20 +7,8 @@ import { RateLimitGuard } from './guards/rate-limit.guard';
 import { ApiKeyGuard } from './guards/api-key.guard';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User]),
-  ],
-  providers: [
-    ValidationService,
-    ApiSecurityService,
-    RateLimitGuard,
-    ApiKeyGuard,
-  ],
-  exports: [
-    ValidationService,
-    ApiSecurityService,
-    RateLimitGuard,
-    ApiKeyGuard,
-  ],
+  imports: [TypeOrmModule.forFeature([User])],
+  providers: [ValidationService, ApiSecurityService, RateLimitGuard, ApiKeyGuard],
+  exports: [ValidationService, ApiSecurityService, RateLimitGuard, ApiKeyGuard],
 })
 export class SecurityModule {}

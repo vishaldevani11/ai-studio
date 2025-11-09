@@ -13,9 +13,7 @@ export class IndustriesService {
   ) {}
 
   async findAll(search?: string) {
-    const where = search
-      ? { name: ILike(`%${search}%`), isDeleted: false }
-      : { isDeleted: false };
+    const where = search ? { name: ILike(`%${search}%`), isDeleted: false } : { isDeleted: false };
 
     return this.repo.find({
       where,

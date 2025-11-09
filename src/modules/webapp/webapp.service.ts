@@ -46,31 +46,31 @@ export class WebAppService {
     });
 
     // Build clean nested JSON for the public webapp
-    return industries.map((industry) => ({
+    return industries.map(industry => ({
       id: industry.id,
       name: industry.name,
       description: industry.description,
       categories: industry.categories
-        ?.filter((cat) => !cat.isDeleted)
-        .map((cat) => ({
+        ?.filter(cat => !cat.isDeleted)
+        .map(cat => ({
           id: cat.id,
           name: cat.name,
           description: cat.description,
           productTypes: cat.productTypes
-            ?.filter((pt) => !pt.isDeleted)
-            .map((pt) => ({
+            ?.filter(pt => !pt.isDeleted)
+            .map(pt => ({
               id: pt.id,
               name: pt.name,
               description: pt.description,
               productThemes: pt.productThemes
-                ?.filter((theme) => !theme.isDeleted)
-                .map((theme) => ({
+                ?.filter(theme => !theme.isDeleted)
+                .map(theme => ({
                   id: theme.id,
                   name: theme.name,
                   description: theme.description,
                   productBackgrounds: theme.productBackgrounds
-                    ?.filter((pb) => !pb.isDeleted)
-                    .map((pb) => ({
+                    ?.filter(pb => !pb.isDeleted)
+                    .map(pb => ({
                       id: pb.id,
                       name: pb.name,
                       description: pb.description,

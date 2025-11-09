@@ -1,4 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ApiSecurityService } from '../services/api-security.service';
 import { BusinessErrors } from '../../common/errors/business.error';
@@ -18,7 +24,7 @@ export class RateLimitGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const options = this.reflector.get<RateLimitOptions>('rateLimit', context.getHandler());
-    
+
     if (!options) {
       return true; // No rate limiting configured
     }
@@ -35,8 +41,10 @@ export class RateLimitGuard implements CanActivate {
     );
 
     if (!allowed) {
-      const message = options.message || `Rate limit exceeded. Try again in ${Math.ceil((info.resetTime.getTime() - Date.now()) / 1000)} seconds.`;
-      
+      const message =
+        options.message ||
+        `Rate limit exceeded. Try again in ${Math.ceil((info.resetTime.getTime() - Date.now()) / 1000)} seconds.`;
+
       throw new HttpException(
         {
           ...BusinessErrors.RATE_LIMIT_EXCEEDED(options.limit, options.window).toJSON(),
@@ -59,13 +67,13 @@ export class RateLimitGuard implements CanActivate {
     // Create a consistent endpoint path for rate limiting
     const method = request.method;
     const path = request.route?.path || request.url.split('?')[0];
-    
+
     // Normalize dynamic routes
     const normalizedPath = path
       .replace(/\/\d+/g, '/:id')
       .replace(/\/[a-f0-9-]{36}/g, '/:uuid')
       .replace(/\/[a-f0-9-]{24}/g, '/:objectId');
-    
+
     return `${method}:${normalizedPath}`;
   }
 }

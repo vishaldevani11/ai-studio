@@ -20,8 +20,31 @@ import { ProductBackgroundsController } from './product-backgrounds/product-back
 import { ProductBackgroundsService } from './product-backgrounds/product-backgrounds.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Industry, Category, ProductType, ProductPose, ProductTheme, ProductBackground])],
-  controllers: [IndustriesController, CategoriesController, ProductTypesController, ProductPosesController, ProductThemesController, ProductBackgroundsController],
-  providers: [IndustriesService, CategoriesService, ProductTypesService, ProductPosesService, ProductThemesService, ProductBackgroundsService],
+  imports: [
+    TypeOrmModule.forFeature([
+      Industry,
+      Category,
+      ProductType,
+      ProductPose,
+      ProductTheme,
+      ProductBackground,
+    ]),
+  ],
+  controllers: [
+    IndustriesController,
+    CategoriesController,
+    ProductTypesController,
+    ProductPosesController,
+    ProductThemesController,
+    ProductBackgroundsController,
+  ],
+  providers: [
+    IndustriesService,
+    CategoriesService,
+    ProductTypesService,
+    ProductPosesService,
+    ProductThemesService,
+    ProductBackgroundsService,
+  ],
 })
 export class AdminModule {}

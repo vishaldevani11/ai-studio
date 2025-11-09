@@ -1,11 +1,4 @@
-import {
-  IsString,
-  IsOptional,
-  MaxLength,
-  IsEnum,
-  IsUrl,
-  ValidateIf,
-} from 'class-validator';
+import { IsString, IsOptional, MaxLength, IsEnum, IsUrl, ValidateIf } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { BusinessType, BusinessSegment } from '../../../database/entities/user-business.entity';
 
@@ -38,7 +31,8 @@ export class BusinessDto {
   })
   @IsOptional()
   @IsEnum(BusinessSegment, {
-    message: 'Business segment must be one of: clothing, accessories, furniture, electronics, other',
+    message:
+      'Business segment must be one of: clothing, accessories, furniture, electronics, other',
   })
   businessSegment?: BusinessSegment;
 
@@ -65,7 +59,7 @@ export class BusinessDto {
     example: 'https://www.example.com',
   })
   @IsOptional()
-  @ValidateIf((o) => o.websiteUrl !== undefined && o.websiteUrl !== null)
+  @ValidateIf(o => o.websiteUrl !== undefined && o.websiteUrl !== null)
   @IsUrl({}, { message: 'Please provide a valid website URL' })
   websiteUrl?: string;
 
@@ -74,8 +68,7 @@ export class BusinessDto {
     example: 'https://www.example.com/logo.png',
   })
   @IsOptional()
-  @ValidateIf((o) => o.businessLogo !== undefined && o.businessLogo !== null)
+  @ValidateIf(o => o.businessLogo !== undefined && o.businessLogo !== null)
   @IsUrl({}, { message: 'Please provide a valid logo URL' })
   businessLogo?: string;
 }
-

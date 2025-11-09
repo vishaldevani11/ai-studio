@@ -17,5 +17,4 @@ export class CreateProductThemeDto {
   @IsArray()
   @IsUUID('all', { each: true })
   productTypeIds?: string[];
-
 }

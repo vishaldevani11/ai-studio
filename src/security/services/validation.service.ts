@@ -80,8 +80,16 @@ export class ValidationService {
 
     // Check for common weak passwords
     const commonPasswords = [
-      'password', '123456', '123456789', 'qwerty', 'abc123',
-      'password123', 'admin', 'letmein', 'welcome', 'monkey'
+      'password',
+      '123456',
+      '123456789',
+      'qwerty',
+      'abc123',
+      'password123',
+      'admin',
+      'letmein',
+      'welcome',
+      'monkey',
     ];
 
     if (commonPasswords.includes(password.toLowerCase())) {
@@ -126,11 +134,22 @@ export class ValidationService {
     }
 
     // Check file extension
-    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.pdf', '.txt', '.json'];
-    const fileExtension = typeof file.originalname === 'string'
-      ? file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.'))
-      : '';
-    
+    const allowedExtensions = [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.svg',
+      '.pdf',
+      '.txt',
+      '.json',
+    ];
+    const fileExtension =
+      typeof file.originalname === 'string'
+        ? file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.'))
+        : '';
+
     if (!allowedExtensions.includes(fileExtension)) {
       errors.push(`File extension ${fileExtension} is not allowed`);
     }
@@ -216,7 +235,7 @@ export class ValidationService {
     // Check for inappropriate content (basic check)
     const inappropriateWords = ['nude', 'explicit', 'adult', 'nsfw'];
     const lowerPrompt = prompt.toLowerCase();
-    
+
     if (inappropriateWords.some(word => lowerPrompt.includes(word))) {
       errors.push('Prompt contains inappropriate content');
     }

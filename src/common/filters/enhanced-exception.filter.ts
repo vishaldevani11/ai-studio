@@ -45,11 +45,11 @@ export class EnhancedExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       message = exception.message;
-      
+
       // Handle validation errors specifically
       if (exception instanceof BadRequestException) {
         const response = exception.getResponse();
-        
+
         // Check if it's a formatted validation error
         if (typeof response === 'object' && response !== null && 'errors' in response) {
           code = 'VALIDATION_ERROR';
@@ -101,7 +101,7 @@ export class EnhancedExceptionFilter implements ExceptionFilter {
           ipAddress: request.ip,
           userAgent: request.get('User-Agent'),
           userId: (request as any).user?.id,
-        }
+        },
       );
     }
 
@@ -122,7 +122,7 @@ export class EnhancedExceptionFilter implements ExceptionFilter {
     // Add validation errors to the response if present
     if (Object.keys(context).length > 0) {
       errorResponse.error.details = context;
-      
+
       // For validation errors, also add errors array at root level for easier access
       if (code === 'VALIDATION_ERROR' && context.validationErrors) {
         errorResponse.errors = context.validationErrors;
@@ -130,13 +130,10 @@ export class EnhancedExceptionFilter implements ExceptionFilter {
     }
 
     // Log error details
-    this.logger.error(
-      `${request.method} ${request.url} - ${status} - ${message}`,
-      {
-        error: errorResponse,
-        stack: exception instanceof Error ? exception.stack : undefined,
-      }
-    );
+    this.logger.error(`${request.method} ${request.url} - ${status} - ${message}`, {
+      error: errorResponse,
+      stack: exception instanceof Error ? exception.stack : undefined,
+    });
 
     response.status(status).json(errorResponse);
   }

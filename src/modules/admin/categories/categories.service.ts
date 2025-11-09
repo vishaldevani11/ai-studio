@@ -17,11 +17,15 @@ export class CategoriesService {
   ) {}
 
   async create(dto: CreateCategoryDto) {
-    const industry = await this.industryRepo.findOne({ where: { id: dto.industryId, isDeleted: false } });
+    const industry = await this.industryRepo.findOne({
+      where: { id: dto.industryId, isDeleted: false },
+    });
     if (!industry) throw new NotFoundException('Industry not found');
 
     // Ensure category name uniqueness within the same industry
-    const existing = await this.repo.findOne({ where: { name: dto.name, industryId: dto.industryId, isDeleted: false } });
+    const existing = await this.repo.findOne({
+      where: { name: dto.name, industryId: dto.industryId, isDeleted: false },
+    });
     if (existing) throw new BadRequestException('Category already exists in this industry');
 
     const entity = this.repo.create({ ...dto, industry });
@@ -54,7 +58,9 @@ export class CategoriesService {
     const category = await this.findOne(id);
 
     if (dto.industryId) {
-      const newIndustry = await this.industryRepo.findOne({ where: { id: dto.industryId, isDeleted: false } });
+      const newIndustry = await this.industryRepo.findOne({
+        where: { id: dto.industryId, isDeleted: false },
+      });
       if (!newIndustry) throw new NotFoundException('New Industry not found');
       category.industry = newIndustry;
     }

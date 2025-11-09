@@ -28,11 +28,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     };
 
     // Log error details
-    this.logger.error(
-      `${request.method} ${request.url}`,
-      exception.stack,
-      'HttpExceptionFilter',
-    );
+    this.logger.error(`${request.method} ${request.url}`, exception.stack, 'HttpExceptionFilter');
 
     response.status(status).json(errorResponse);
   }
@@ -47,13 +43,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status = exception instanceof HttpException
-      ? exception.getStatus()
-      : HttpStatus.INTERNAL_SERVER_ERROR;
+    const status =
+      exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message = exception instanceof HttpException
-      ? exception.message
-      : 'Internal server error';
+    const message =
+      exception instanceof HttpException ? exception.message : 'Internal server error';
 
     const errorResponse = {
       statusCode: status,

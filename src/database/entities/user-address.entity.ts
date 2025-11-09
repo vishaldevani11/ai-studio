@@ -25,14 +25,21 @@ export class UserAddress extends BaseEntity {
   @Column({ name: 'country', length: 100, default: 'India' })
   country: string;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone', default: () => 'NOW()' })
+  @CreateDateColumn({
+    name: 'created_at',
+    type: 'timestamp with time zone',
+    default: () => 'NOW()',
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone', default: () => 'NOW()' })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamp with time zone',
+    default: () => 'NOW()',
+  })
   updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.addresses, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, user => user.addresses, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }
-

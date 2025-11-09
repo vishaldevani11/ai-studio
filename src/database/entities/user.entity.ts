@@ -3,7 +3,6 @@ import { BaseEntity } from './base.entity';
 //import { Image } from './image.entity';
 import { UserAddress } from './user-address.entity';
 import { UserBusiness } from './user-business.entity';
-import { UserSubscription } from './user-subscription.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -19,7 +18,6 @@ export enum UserStatus {
 
 @Entity('users')
 export class User extends BaseEntity {
-
   @Column({ name: 'first_name', length: 100 })
   firstName: string;
 
@@ -44,9 +42,6 @@ export class User extends BaseEntity {
   @Column({ name: 'phone_verified', default: false })
   phoneVerified: boolean;
 
-  @Column({ name: 'email_subscribed', default: false })
-  emailSubscribed: boolean;
-
   @Column({
     name: 'role',
     type: 'enum',
@@ -63,10 +58,18 @@ export class User extends BaseEntity {
   })
   status: UserStatus;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone', default: () => 'NOW()' })
+  @CreateDateColumn({
+    name: 'created_at',
+    type: 'timestamp with time zone',
+    default: () => 'NOW()',
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone', default: () => 'NOW()' })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamp with time zone',
+    default: () => 'NOW()',
+  })
   updatedAt: Date;
 
   @Column({ name: 'last_login', type: 'timestamp with time zone', nullable: true })
@@ -87,12 +90,9 @@ export class User extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true, select: false })
   passwordResetExpires?: Date;
 
-  @OneToMany(() => UserAddress, (address) => address.user, { cascade: true })
+  @OneToMany(() => UserAddress, address => address.user, { cascade: true })
   addresses: UserAddress[];
 
-  @OneToOne(() => UserBusiness, (business) => business.user)
+  @OneToOne(() => UserBusiness, business => business.user)
   business: UserBusiness;
-
-  @OneToMany(() => UserSubscription, (subscription) => subscription.user)
-  subscriptions: UserSubscription[];
 }

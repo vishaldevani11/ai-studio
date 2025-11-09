@@ -39,4 +39,3 @@ export class CategoriesController {
     return this.service.softDelete(id);
   }
 }
-
