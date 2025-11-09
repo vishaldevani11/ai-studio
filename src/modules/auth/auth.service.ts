@@ -18,6 +18,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { BCRYPT_SALT_ROUNDS, DEFAULT_ADDRESS_COUNTRY, PASSWORD_RESET_TOKEN_BYTES } from '../../common/constants/auth.constants';
 
 @Injectable()
 export class AuthService {
@@ -64,7 +65,7 @@ export class AuthService {
 
     try {
       // Hash password
-      const hashedPassword = await bcrypt.hash(password, 12);
+      const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
       // Create user
       const user = this.userRepository.create({
@@ -90,7 +91,7 @@ export class AuthService {
           city: address.city || null,
           state: address.state || null,
           zipcode: address.zipcode || null,
-          country: address.country || 'India',
+          country: address.country || DEFAULT_ADDRESS_COUNTRY,
         });
         await queryRunner.manager.save(UserAddress, userAddress);
       }
@@ -258,7 +259,7 @@ export class AuthService {
       return;
     }
 
-    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetToken = crypto.randomBytes(PASSWORD_RESET_TOKEN_BYTES).toString('hex');
     const passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
     const passwordResetExpires = new Date(
@@ -272,7 +273,7 @@ export class AuthService {
 
     // In a real application, you would send an email to the user with the resetToken.
     // For this example, we'll just log it to the console.
-    console.log(`Password reset token for ${email}: ${resetToken}`);
+    // console.log(`Password reset token for ${email}: ${resetToken}`);
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
@@ -402,7 +403,7 @@ export class AuthService {
     }
 
     // Hash new password
-    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+    const hashedNewPassword = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
 
     // Update password
     await this.userRepository.update(userId, {

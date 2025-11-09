@@ -1,3 +1,4 @@
+import { REFRESH_TOKEN_FIELD_NAME } from '../../../common/constants/auth.constants';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -13,7 +14,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
     private authService: AuthService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
+      jwtFromRequest: ExtractJwt.fromBodyField(REFRESH_TOKEN_FIELD_NAME),
       ignoreExpiration: false,
       secretOrKey: configService.get<string>('app.jwt.refreshSecret'), // ⭐ FIXED
       passReqToCallback: true,

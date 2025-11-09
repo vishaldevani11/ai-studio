@@ -1,4 +1,11 @@
 import {
+  RATE_LIMIT_METADATA_KEY,
+  RATE_LIMIT_DEFAULT_MESSAGE,
+  X_RATE_LIMIT_LIMIT_HEADER,
+  X_RATE_LIMIT_REMAINING_HEADER,
+  X_RATE_LIMIT_RESET_HEADER,
+} from '../../common/constants/security.constants';
+import {
   Injectable,
   CanActivate,
   ExecutionContext,
@@ -23,7 +30,7 @@ export class RateLimitGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const options = this.reflector.get<RateLimitOptions>('rateLimit', context.getHandler());
+    const options = this.reflector.get<RateLimitOptions>(RATE_LIMIT_METADATA_KEY, context.getHandler());
 
     if (!options) {
       return true; // No rate limiting configured
@@ -43,7 +50,10 @@ export class RateLimitGuard implements CanActivate {
     if (!allowed) {
       const message =
         options.message ||
-        `Rate limit exceeded. Try again in ${Math.ceil((info.resetTime.getTime() - Date.now()) / 1000)} seconds.`;
+        RATE_LIMIT_DEFAULT_MESSAGE.replace(
+          '{seconds}',
+          Math.ceil((info.resetTime.getTime() - Date.now()) / 1000).toString(),
+        );
 
       throw new HttpException(
         {
@@ -56,9 +66,9 @@ export class RateLimitGuard implements CanActivate {
 
     // Add rate limit info to response headers
     const response = context.switchToHttp().getResponse();
-    response.setHeader('X-RateLimit-Limit', info.limit);
-    response.setHeader('X-RateLimit-Remaining', Math.max(0, info.limit - info.count));
-    response.setHeader('X-RateLimit-Reset', Math.ceil(info.resetTime.getTime() / 1000));
+    response.setHeader(X_RATE_LIMIT_LIMIT_HEADER, info.limit);
+    response.setHeader(X_RATE_LIMIT_REMAINING_HEADER, Math.max(0, info.limit - info.count));
+    response.setHeader(X_RATE_LIMIT_RESET_HEADER, Math.ceil(info.resetTime.getTime() / 1000));
 
     return true;
   }
