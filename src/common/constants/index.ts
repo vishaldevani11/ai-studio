@@ -3,6 +3,7 @@ export const API_PREFIX = `api/${API_VERSION}`;
 
 export const ROUTES = {
   AUTH: {
+    BASE: 'auth',
     REGISTER: 'auth/register',
     LOGIN: 'auth/login',
     REFRESH: 'auth/refresh',

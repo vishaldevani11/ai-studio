@@ -4,9 +4,6 @@ import {
   DEFAULT_PORT,
   DEFAULT_DB_HOST,
   DEFAULT_DB_PORT,
-  DEFAULT_DB_USERNAME,
-  DEFAULT_DB_PASSWORD,
-  DEFAULT_DB_DATABASE,
   DEFAULT_JWT_EXPIRES_IN,
   DEFAULT_JWT_REFRESH_EXPIRES_IN,
   DEFAULT_CORS_ORIGIN,
@@ -19,7 +16,7 @@ import {
   DEFAULT_LOG_FILE,
   DEFAULT_CSRF_ENABLED,
   DEFAULT_HELMET_ENABLED,
-} from '../../common/constants/config.constants';
+} from 'src/common/constants/config.constants';
 
 export const validationSchema = Joi.object({
   NODE_ENV: Joi.string().valid('development', 'production', 'test').default(DEFAULT_NODE_ENV),

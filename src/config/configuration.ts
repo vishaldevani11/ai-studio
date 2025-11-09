@@ -38,7 +38,7 @@ import {
   DEFAULT_CLOUDINARY_API_KEY,
   DEFAULT_CLOUDINARY_API_SECRET,
   DEFAULT_BASE_URL,
-} from '../../common/constants/config.constants';
+} from 'src/common/constants/config.constants';
 
 export default registerAs('app', () => ({
   nodeEnv: process.env.NODE_ENV || DEFAULT_NODE_ENV,

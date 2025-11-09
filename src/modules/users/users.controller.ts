@@ -2,7 +2,6 @@ import { ROUTES } from '../../common/constants';
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
