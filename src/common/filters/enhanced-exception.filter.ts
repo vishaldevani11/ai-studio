@@ -8,7 +8,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { BusinessError } from '../errors/business.error';
+import { BusinessError, ErrorCode } from '../errors';
+import { ERROR_MESSAGES } from '../constants';
 import { ErrorTrackingService } from '../services/error-tracking.service';
 
 @Catch()
@@ -52,14 +53,14 @@ export class EnhancedExceptionFilter implements ExceptionFilter {
 
         // Check if it's a formatted validation error
         if (typeof response === 'object' && response !== null && 'errors' in response) {
-          code = 'VALIDATION_ERROR';
+          code = ErrorCode.SYSTEM_VALIDATION_ERROR;
           context = {
             validationErrors: (response as any).errors,
             errorCount: (response as any).errorCount || 0,
           };
-          message = (response as any).message || 'Validation failed';
+          message = (response as any).message || ERROR_MESSAGES.VALIDATION_FAILED;
         } else {
-          code = 'VALIDATION_ERROR';
+          code = ErrorCode.SYSTEM_VALIDATION_ERROR;
           // Try to extract validation details from response
           if (typeof response === 'object' && response !== null) {
             const responseObj = response as any;
@@ -69,12 +70,12 @@ export class EnhancedExceptionFilter implements ExceptionFilter {
                 validationErrors: responseObj.message,
                 errorCount: responseObj.message.length,
               };
-              message = 'Validation failed';
+              message = ERROR_MESSAGES.VALIDATION_FAILED;
             }
           }
         }
       } else {
-        code = 'HTTP_EXCEPTION';
+        code = ErrorCode.SYSTEM_INTERNAL_SERVER_ERROR;
       }
 
       // Track HTTP exceptions
@@ -88,8 +89,8 @@ export class EnhancedExceptionFilter implements ExceptionFilter {
       });
     } else {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
-      message = 'Internal server error';
-      code = 'INTERNAL_SERVER_ERROR';
+      message = ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
+      code = ErrorCode.SYSTEM_INTERNAL_SERVER_ERROR;
 
       // Track system errors
       await this.errorTrackingService.trackSystemError(

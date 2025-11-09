@@ -28,7 +28,7 @@ export class FeatureFlagService {
     featureName: string,
     userId?: string,
     userRole?: string,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): Promise<boolean> {
     try {
       const flags = await this.getFeatureFlags();
@@ -63,7 +63,7 @@ export class FeatureFlagService {
       if (flag.rolloutPercentage !== undefined && userId) {
         const userHash = this.hashUserId(userId);
         const userPercentage = userHash % 100;
-        
+
         if (userPercentage >= flag.rolloutPercentage) {
           return false;
         }
@@ -95,10 +95,10 @@ export class FeatureFlagService {
 
       // Load from configuration
       const flags = this.loadFeatureFlagsFromConfig();
-      
+
       // Cache the result
       await this.cacheService.set(this.cacheKey, flags, { ttl: this.cacheTtl });
-      
+
       return flags;
     } catch (error) {
       this.logger.error('Error loading feature flags:', error);
@@ -110,10 +110,10 @@ export class FeatureFlagService {
     try {
       const flags = await this.getFeatureFlags();
       flags[flag.name] = flag;
-      
+
       // Update cache
       await this.cacheService.set(this.cacheKey, flags, { ttl: this.cacheTtl });
-      
+
       this.logger.log(`Feature flag updated: ${flag.name}`);
     } catch (error) {
       this.logger.error(`Error setting feature flag ${flag.name}:`, error);
@@ -124,10 +124,10 @@ export class FeatureFlagService {
     try {
       const flags = await this.getFeatureFlags();
       delete flags[featureName];
-      
+
       // Update cache
       await this.cacheService.set(this.cacheKey, flags, { ttl: this.cacheTtl });
-      
+
       this.logger.log(`Feature flag deleted: ${featureName}`);
     } catch (error) {
       this.logger.error(`Error deleting feature flag ${featureName}:`, error);
@@ -219,7 +219,7 @@ export class FeatureFlagService {
     let hash = 0;
     for (let i = 0; i < userId.length; i++) {
       const char = userId.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);

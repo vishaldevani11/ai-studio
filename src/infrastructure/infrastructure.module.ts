@@ -5,17 +5,8 @@ import { CacheModule } from '../cache/cache.module';
 import { ConfigurationModule } from '../configuration/configuration.module';
 
 @Module({
-  imports: [
-    CacheModule,
-    forwardRef(() => ConfigurationModule),
-  ],
-  providers: [
-    HealthCheckService,
-    GracefulShutdownService,
-  ],
-  exports: [
-    HealthCheckService,
-    GracefulShutdownService,
-  ],
+  imports: [CacheModule, forwardRef(() => ConfigurationModule)],
+  providers: [HealthCheckService, GracefulShutdownService],
+  exports: [HealthCheckService, GracefulShutdownService],
 })
 export class InfrastructureModule {}

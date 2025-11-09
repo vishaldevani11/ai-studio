@@ -46,22 +46,19 @@ export class GracefulShutdownService implements OnApplicationShutdown {
     );
 
     // Wait for all tasks to complete or timeout
-    await Promise.race([
-      Promise.allSettled(shutdownPromises),
-      timeoutPromise,
-    ]);
+    await Promise.race([Promise.allSettled(shutdownPromises), timeoutPromise]);
   }
 
   private async closeDatabaseConnections(): Promise<void> {
     try {
       this.logger.log('Closing database connections...');
-      
+
       // In a real implementation, you would close TypeORM connections
       // await this.dataSource.destroy();
-      
+
       // Mock delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       this.logger.log('Database connections closed');
     } catch (error) {
       this.logger.error('Error closing database connections:', error);
@@ -71,13 +68,13 @@ export class GracefulShutdownService implements OnApplicationShutdown {
   private async closeCacheConnections(): Promise<void> {
     try {
       this.logger.log('Closing cache connections...');
-      
+
       // In a real implementation, you would close Redis connections
       // await this.redisClient.quit();
-      
+
       // Mock delay
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       this.logger.log('Cache connections closed');
     } catch (error) {
       this.logger.error('Error closing cache connections:', error);
@@ -87,13 +84,13 @@ export class GracefulShutdownService implements OnApplicationShutdown {
   private async closeQueueConnections(): Promise<void> {
     try {
       this.logger.log('Closing queue connections...');
-      
+
       // In a real implementation, you would close Bull queue connections
       // await this.queue.close();
-      
+
       // Mock delay
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       this.logger.log('Queue connections closed');
     } catch (error) {
       this.logger.error('Error closing queue connections:', error);
@@ -103,13 +100,13 @@ export class GracefulShutdownService implements OnApplicationShutdown {
   private async finishActiveRequests(): Promise<void> {
     try {
       this.logger.log('Waiting for active requests to complete...');
-      
+
       // In a real implementation, you would track active requests
       // and wait for them to complete
-      
+
       // Mock delay
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       this.logger.log('Active requests completed');
     } catch (error) {
       this.logger.error('Error finishing active requests:', error);
@@ -119,16 +116,16 @@ export class GracefulShutdownService implements OnApplicationShutdown {
   private async cleanupResources(): Promise<void> {
     try {
       this.logger.log('Cleaning up resources...');
-      
+
       // Clean up temporary files
       // await this.cleanupTempFiles();
-      
+
       // Clean up logs
       // await this.cleanupLogs();
-      
+
       // Mock delay
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       this.logger.log('Resources cleaned up');
     } catch (error) {
       this.logger.error('Error cleaning up resources:', error);

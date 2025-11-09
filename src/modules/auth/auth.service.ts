@@ -18,7 +18,11 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
-import { BCRYPT_SALT_ROUNDS, DEFAULT_ADDRESS_COUNTRY, PASSWORD_RESET_TOKEN_BYTES } from '../../common/constants/auth.constants';
+import {
+  BCRYPT_SALT_ROUNDS,
+  DEFAULT_ADDRESS_COUNTRY,
+  PASSWORD_RESET_TOKEN_BYTES,
+} from '../../common/constants/auth.constants';
 
 @Injectable()
 export class AuthService {

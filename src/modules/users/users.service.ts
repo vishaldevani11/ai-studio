@@ -63,7 +63,7 @@ export class UsersService {
     const updatedUser = await this.userRepository.save(user);
 
     // Return user without sensitive data
-    const { passwordHash, refreshToken, refreshTokenExpires, ...userWithoutSensitiveData } =
+    const { _passwordHash, _refreshToken, _refreshTokenExpires, ...userWithoutSensitiveData } =
       updatedUser;
     return userWithoutSensitiveData as User;
   }
@@ -153,7 +153,7 @@ export class UsersService {
     const updatedUser = await this.userRepository.save(user);
 
     // Return user without sensitive data
-    const { passwordHash, refreshToken, refreshTokenExpires, ...userWithoutSensitiveData } =
+    const { _passwordHash, _refreshToken, _refreshTokenExpires, ...userWithoutSensitiveData } =
       updatedUser;
     return userWithoutSensitiveData as User;
   }

@@ -100,8 +100,8 @@ export class HealthCheckService {
       status: isAlive ? 'alive' : 'dead',
       uptime: Date.now() - this.startTime,
       memory: {
-        used: Math.round(usedMemory / 1024 / 1024 * 100) / 100, // MB
-        total: Math.round(totalMemory / 1024 / 1024 * 100) / 100, // MB
+        used: Math.round((usedMemory / 1024 / 1024) * 100) / 100, // MB
+        total: Math.round((totalMemory / 1024 / 1024) * 100) / 100, // MB
         percentage: Math.round(memoryPercentage * 100) / 100,
       },
     };
@@ -109,13 +109,13 @@ export class HealthCheckService {
 
   private async checkDatabase(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       // Mock database check - in production, this would execute a simple query
       await new Promise(resolve => setTimeout(resolve, 10)); // Simulate DB query
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       return {
         service: 'database',
         status: 'healthy',
@@ -137,17 +137,17 @@ export class HealthCheckService {
 
   private async checkCache(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       // Test cache connectivity
       const testKey = 'health_check_test';
       await this.cacheService.set(testKey, 'test_value', { ttl: 10 });
       const value = await this.cacheService.get(testKey);
       await this.cacheService.del(testKey);
-      
+
       const responseTime = Date.now() - startTime;
       const isHealthy = value === 'test_value';
-      
+
       return {
         service: 'cache',
         status: isHealthy ? 'healthy' : 'unhealthy',
@@ -169,11 +169,11 @@ export class HealthCheckService {
 
   private async checkSecrets(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       const healthCheck = await this.secretsService.healthCheck();
       const responseTime = Date.now() - startTime;
-      
+
       return {
         service: 'secrets',
         status: healthCheck.status,
@@ -192,7 +192,7 @@ export class HealthCheckService {
 
   private async checkExternalServices(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       const services = [
         { name: 'gemini_api', url: this.configService.get('app.gemini.apiUrl') },
@@ -200,7 +200,7 @@ export class HealthCheckService {
       ];
 
       const results: Record<string, boolean> = {};
-      
+
       for (const service of services) {
         try {
           // Mock external service check
@@ -242,7 +242,7 @@ export class HealthCheckService {
 
   private async checkDiskSpace(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       // Mock disk space check - in production, use fs.stat or similar
       const totalSpace = 100 * 1024 * 1024 * 1024; // 100GB
@@ -266,9 +266,9 @@ export class HealthCheckService {
         status,
         responseTime,
         details: {
-          total: Math.round(totalSpace / 1024 / 1024 / 1024 * 100) / 100, // GB
-          used: Math.round(usedSpace / 1024 / 1024 / 1024 * 100) / 100, // GB
-          free: Math.round(freeSpace / 1024 / 1024 / 1024 * 100) / 100, // GB
+          total: Math.round((totalSpace / 1024 / 1024 / 1024) * 100) / 100, // GB
+          used: Math.round((usedSpace / 1024 / 1024 / 1024) * 100) / 100, // GB
+          free: Math.round((freeSpace / 1024 / 1024 / 1024) * 100) / 100, // GB
           usagePercentage: Math.round(usagePercentage * 100) / 100,
         },
       };
@@ -284,7 +284,7 @@ export class HealthCheckService {
 
   private async checkMemory(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       const memoryUsage = process.memoryUsage();
       const totalMemory = memoryUsage.heapTotal;
@@ -307,8 +307,8 @@ export class HealthCheckService {
         status,
         responseTime,
         details: {
-          total: Math.round(totalMemory / 1024 / 1024 * 100) / 100, // MB
-          used: Math.round(usedMemory / 1024 / 1024 * 100) / 100, // MB
+          total: Math.round((totalMemory / 1024 / 1024) * 100) / 100, // MB
+          used: Math.round((usedMemory / 1024 / 1024) * 100) / 100, // MB
           usagePercentage: Math.round(usagePercentage * 100) / 100,
         },
       };

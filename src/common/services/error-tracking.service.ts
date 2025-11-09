@@ -94,7 +94,7 @@ export class ErrorTrackingService {
     };
   }
 
-  async getErrorTrends(timeWindow: number = 3600): Promise<
+  async getErrorTrends(_timeWindow: number = 3600): Promise<
     Array<{
       timestamp: Date;
       errorCount: number;

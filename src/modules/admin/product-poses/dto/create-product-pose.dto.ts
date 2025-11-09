@@ -1,4 +1,4 @@
-import { IsString, IsUUID, IsOptional, Length, IsUrl } from 'class-validator';
+import { IsString, IsUUID, IsOptional, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductPoseDto {

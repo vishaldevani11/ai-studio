@@ -30,15 +30,6 @@
     "node_modules",
     "dist",
     "test",
-    "**/*spec.ts",
-    "src/modules/images/**",
-    "src/modules/billing/**",
-    "src/monitoring/**",
-    "src/queue/**",
-    "src/storage/**",
-    "src/domain/**",
-    "src/infrastructure/**",
-    "src/configuration/**",
-    "src/cache/**"
+    "**/*spec.ts"
   ]
 }

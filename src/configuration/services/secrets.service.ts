@@ -22,12 +22,12 @@ export class SecretsService {
 
       // Load from configuration or external service
       const secret = await this.loadSecret(key);
-      
+
       if (secret) {
         // Cache the secret
         await this.cacheService.set(`secret:${key}`, secret, { ttl: this.cacheTtl });
       }
-      
+
       return secret;
     } catch (error) {
       this.logger.error(`Error getting secret ${key}:`, error);
@@ -36,84 +36,105 @@ export class SecretsService {
   }
 
   async getDatabasePassword(): Promise<string> {
-    return await this.getSecret('database_password') || 
-           this.configService.get('app.database.password') || 
-           'default_password';
+    return (
+      (await this.getSecret('database_password')) ||
+      this.configService.get('app.database.password') ||
+      'default_password'
+    );
   }
 
   async getJwtSecret(): Promise<string> {
-    return await this.getSecret('jwt_secret') || 
-           this.configService.get('app.jwt.secret') || 
-           'default_jwt_secret';
+    return (
+      (await this.getSecret('jwt_secret')) ||
+      this.configService.get('app.jwt.secret') ||
+      'default_jwt_secret'
+    );
   }
 
   async getJwtRefreshSecret(): Promise<string> {
-    return await this.getSecret('jwt_refresh_secret') || 
-           this.configService.get('app.jwt.refreshSecret') || 
-           'default_refresh_secret';
+    return (
+      (await this.getSecret('jwt_refresh_secret')) ||
+      this.configService.get('app.jwt.refreshSecret') ||
+      'default_refresh_secret'
+    );
   }
 
   async getStripeSecretKey(): Promise<string> {
-    return await this.getSecret('stripe_secret_key') || 
-           this.configService.get('app.stripe.secretKey') || 
-           'sk_test_default';
+    return (
+      (await this.getSecret('stripe_secret_key')) ||
+      this.configService.get('app.stripe.secretKey') ||
+      'sk_test_default'
+    );
   }
 
   async getStripeWebhookSecret(): Promise<string> {
-    return await this.getSecret('stripe_webhook_secret') || 
-           this.configService.get('app.stripe.webhookSecret') || 
-           'whsec_default';
+    return (
+      (await this.getSecret('stripe_webhook_secret')) ||
+      this.configService.get('app.stripe.webhookSecret') ||
+      'whsec_default'
+    );
   }
 
   async getGeminiApiKey(): Promise<string> {
-    return await this.getSecret('gemini_api_key') || 
-           this.configService.get('app.gemini.apiKey') || 
-           'default_gemini_key';
+    return (
+      (await this.getSecret('gemini_api_key')) ||
+      this.configService.get('app.gemini.apiKey') ||
+      'default_gemini_key'
+    );
   }
 
   async getRedisPassword(): Promise<string | null> {
-    return await this.getSecret('redis_password') || 
-           this.configService.get('app.redis.password');
+    return (await this.getSecret('redis_password')) || this.configService.get('app.redis.password');
   }
 
   async getS3AccessKeyId(): Promise<string> {
-    return await this.getSecret('s3_access_key_id') || 
-           this.configService.get('app.storage.s3.accessKeyId') || 
-           'default_access_key';
+    return (
+      (await this.getSecret('s3_access_key_id')) ||
+      this.configService.get('app.storage.s3.accessKeyId') ||
+      'default_access_key'
+    );
   }
 
   async getS3SecretAccessKey(): Promise<string> {
-    return await this.getSecret('s3_secret_access_key') || 
-           this.configService.get('app.storage.s3.secretAccessKey') || 
-           'default_secret_key';
+    return (
+      (await this.getSecret('s3_secret_access_key')) ||
+      this.configService.get('app.storage.s3.secretAccessKey') ||
+      'default_secret_key'
+    );
   }
 
   async getCloudinaryApiSecret(): Promise<string> {
-    return await this.getSecret('cloudinary_api_secret') || 
-           this.configService.get('app.storage.cloudinary.apiSecret') || 
-           'default_cloudinary_secret';
+    return (
+      (await this.getSecret('cloudinary_api_secret')) ||
+      this.configService.get('app.storage.cloudinary.apiSecret') ||
+      'default_cloudinary_secret'
+    );
   }
 
   async getEmailApiKey(): Promise<string> {
-    return await this.getSecret('email_api_key') || 
-           this.configService.get('app.email.apiKey') || 
-           'default_email_key';
+    return (
+      (await this.getSecret('email_api_key')) ||
+      this.configService.get('app.email.apiKey') ||
+      'default_email_key'
+    );
   }
 
   async getMonitoringApiKey(): Promise<string> {
-    return await this.getSecret('monitoring_api_key') || 
-           this.configService.get('app.monitoring.apiKey') || 
-           'default_monitoring_key';
+    return (
+      (await this.getSecret('monitoring_api_key')) ||
+      this.configService.get('app.monitoring.apiKey') ||
+      'default_monitoring_key'
+    );
   }
 
   async rotateSecret(key: string, newValue: string): Promise<void> {
     try {
       // Update in external secret management service
       await this.updateSecretInExternalService(key, newValue);
-      
+
       // Clear cache
       await this.cacheService.del(`secret:${key}`);
-      
+
       this.logger.log(`Secret rotated: ${key}`);
     } catch (error) {
       this.logger.error(`Error rotating secret ${key}:`, error);
@@ -157,7 +178,7 @@ export class SecretsService {
     return mockSecrets[key] || null;
   }
 
-  private async updateSecretInExternalService(key: string, newValue: string): Promise<void> {
+  private async updateSecretInExternalService(key: string, _newValue: string): Promise<void> {
     // Mock implementation - in production, this would update the secret in the external service
     this.logger.log(`Secret updated in external service: ${key}`);
   }

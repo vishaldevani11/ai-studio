@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ApiSecurityService } from '../services/api-security.service';
-import { BusinessErrors } from '../../common/errors/business.error';
+import { BusinessErrors } from 'src/common/errors/error.factory';
 
 export interface RateLimitOptions {
   limit: number;
@@ -30,7 +30,10 @@ export class RateLimitGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const options = this.reflector.get<RateLimitOptions>(RATE_LIMIT_METADATA_KEY, context.getHandler());
+    const options = this.reflector.get<RateLimitOptions>(
+      RATE_LIMIT_METADATA_KEY,
+      context.getHandler(),
+    );
 
     if (!options) {
       return true; // No rate limiting configured
@@ -48,13 +51,6 @@ export class RateLimitGuard implements CanActivate {
     );
 
     if (!allowed) {
-      const message =
-        options.message ||
-        RATE_LIMIT_DEFAULT_MESSAGE.replace(
-          '{seconds}',
-          Math.ceil((info.resetTime.getTime() - Date.now()) / 1000).toString(),
-        );
-
       throw new HttpException(
         {
           ...BusinessErrors.RATE_LIMIT_EXCEEDED(options.limit, options.window).toJSON(),

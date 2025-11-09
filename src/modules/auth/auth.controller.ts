@@ -152,7 +152,7 @@ export class AuthController {
   })
   async getProfile(@CurrentUser() user: User) {
     const userProfile = await this.authService.getProfile(user.id);
-    return ResponseUtil.success(new ProfileDto(), 'Profile retrieved successfully');
+    return ResponseUtil.success(userProfile, 'Profile retrieved successfully');
   }
 
   @UseGuards(JwtAuthGuard)
@@ -172,7 +172,7 @@ export class AuthController {
   })
   async updateProfile(@CurrentUser() user: User, @Body() updateProfileDto: UpdateProfileDto) {
     const updatedUser = await this.authService.updateProfile(user.id, updateProfileDto);
-    return ResponseUtil.success(new ProfileDto(), 'Profile updated successfully');
+    return ResponseUtil.success(updatedUser, 'Profile updated successfully');
   }
 
   @UseGuards(JwtAuthGuard)

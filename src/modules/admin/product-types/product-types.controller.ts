@@ -3,7 +3,7 @@ import { Controller, Get, Post, Body, Param, Query, Put, Patch } from '@nestjs/c
 import { ProductTypesService } from './product-types.service';
 import { CreateProductTypeDto } from './dto/create-product-type.dto';
 import { UpdateProductTypeDto } from './dto/update-product-type.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Admin - Product Types')
 @Controller(ROUTES.ADMIN.PRODUCT_TYPES)
