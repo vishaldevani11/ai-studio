@@ -15,7 +15,6 @@ export class LoggingInterceptor implements NestInterceptor {
     const requestId = uuidv4();
     request.requestId = requestId;
     response.setHeader('X-Request-ID', requestId);
-
     const { method, url, ip } = request;
     const userAgent = request.get('User-Agent') || '';
     const startTime = Date.now();
