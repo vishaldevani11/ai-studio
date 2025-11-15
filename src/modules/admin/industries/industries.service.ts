@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
 import { Industry } from './industry.entity';
@@ -23,7 +23,6 @@ export class IndustriesService {
 
   async findOne(id: string) {
     const industry = await this.repo.findOne({ where: { id, isDeleted: false } });
-    if (!industry) throw new NotFoundException('Industry not found');
     return industry;
   }
 
@@ -40,7 +39,7 @@ export class IndustriesService {
 
   async softDelete(id: string) {
     const industry = await this.findOne(id);
-    industry.isDeleted = true;
+    industry.isDeleted = !industry.isDeleted;
     return this.repo.save(industry);
   }
 }

@@ -1,18 +1,10 @@
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
+  error: boolean;
   message?: string;
   timestamp: string;
   requestId?: string;
-}
-
-export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
 }
 
 export class ResponseUtil {
@@ -20,41 +12,21 @@ export class ResponseUtil {
     return {
       success: true,
       data,
+      error: false,
       message,
       timestamp: new Date().toISOString(),
       requestId,
     };
   }
 
-  static error(message: string, requestId?: string): ApiResponse {
+  static error<T>(data: T, message: string, requestId?: string): ApiResponse {
     return {
       success: false,
       message,
-      timestamp: new Date().toISOString(),
-      requestId,
-    };
-  }
-
-  static paginated<T>(
-    data: T[],
-    page: number,
-    limit: number,
-    total: number,
-    message?: string,
-    requestId?: string,
-  ): PaginatedResponse<T> {
-    return {
-      success: true,
       data,
-      message,
+      error: true,
       timestamp: new Date().toISOString(),
       requestId,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
     };
   }
 }

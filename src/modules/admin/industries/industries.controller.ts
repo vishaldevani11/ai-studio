@@ -14,7 +14,8 @@ import {
 import { IndustriesService } from './industries.service';
 import { CreateIndustryDto } from './dto/create-industry.dto';
 import { UpdateIndustryDto } from './dto/update-industry.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ResponseUtil } from '@/common/utils/response.util';
 
 @ApiTags('Admin - Industries')
 @Controller(ROUTES.ADMIN.INDUSTRIES)
@@ -24,36 +25,43 @@ export class IndustriesController {
   @Get()
   @ApiOperation({ summary: 'Get all industries' })
   @ApiResponse({ status: 200, description: 'Industries retrieved successfully' })
-  findAll(@Query('search') search?: string) {
-    return this.service.findAll(search);
+  @ApiQuery({ name: 'search', required: false, type: String })
+  async findAll(@Query('search') search?: string) {
+    const result = await this.service.findAll(search);
+    return ResponseUtil.success(result, 'Industries retrieved successfully');
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get an industry by ID' })
   @ApiResponse({ status: 200, description: 'Industry retrieved successfully' })
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const result = await this.service.findOne(id);
+    if (!result) return ResponseUtil.error(null, 'Industry not found');
+    return ResponseUtil.success(result, 'Industries retrieved successfully');
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new industry' })
   @ApiResponse({ status: 201, description: 'Industry created successfully' })
-  create(@Body() dto: CreateIndustryDto) {
-    return this.service.create(dto);
+  async create(@Body() dto: CreateIndustryDto) {
+    const result = await this.service.create(dto);
+    return ResponseUtil.success(result, 'Industry created successfully');
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update an industry by ID' })
   @ApiResponse({ status: 200, description: 'Industry updated successfully' })
-  update(@Param('id') id: string, @Body() dto: UpdateIndustryDto) {
-    return this.service.update(id, dto);
+  async update(@Param('id') id: string, @Body() dto: UpdateIndustryDto) {
+    const result = await this.service.update(id, dto);
+    return ResponseUtil.success(result, 'Industry updated successfully');
   }
 
   @Patch(':id/soft-delete')
   @ApiOperation({ summary: 'Soft delete an industry by ID' })
   @ApiResponse({ status: 200, description: 'Industry soft deleted successfully' })
-  softDelete(@Param('id') id: string) {
-    return this.service.softDelete(id);
+  async softDelete(@Param('id') id: string) {
+    const result = await this.service.softDelete(id);
+    return ResponseUtil.success(result, 'Industry soft deleted successfully');
   }
 }
