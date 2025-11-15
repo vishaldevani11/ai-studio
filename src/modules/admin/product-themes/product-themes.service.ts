@@ -55,7 +55,7 @@ export class ProductThemesService {
 
   async softDelete(id: string) {
     const productTheme = await this.findOne(id);
-    productTheme.isDeleted = true;
+    productTheme.isDeleted = !productTheme.isDeleted;
     return this.repo.save(productTheme);
   }
 }

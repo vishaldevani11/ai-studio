@@ -71,7 +71,7 @@ export class CategoriesService {
 
   async softDelete(id: string) {
     const category = await this.findOne(id);
-    category.isDeleted = true;
+    category.isDeleted = !category.isDeleted;
     return this.repo.save(category);
   }
 }

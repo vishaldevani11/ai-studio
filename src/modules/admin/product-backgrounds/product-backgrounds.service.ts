@@ -65,7 +65,7 @@ export class ProductBackgroundsService {
 
   async softDelete(id: string) {
     const productBackground = await this.findOne(id);
-    productBackground.isDeleted = true;
+    productBackground.isDeleted = !productBackground.isDeleted;
     return this.repo.save(productBackground);
   }
 }

@@ -3,7 +3,8 @@ import { Controller, Get, Post, Body, Param, Query, Put, Patch } from '@nestjs/c
 import { ProductPosesService } from './product-poses.service';
 import { CreateProductPoseDto } from './dto/create-product-pose.dto';
 import { UpdateProductPoseDto } from './dto/update-product-pose.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ResponseUtil } from '@/common/utils/response.util';
 
 @ApiTags('Admin - Product Poses')
 @Controller(ROUTES.ADMIN.PRODUCT_POSES)
@@ -13,35 +14,42 @@ export class ProductPosesController {
   @Get()
   @ApiOperation({ summary: 'Get all product poses (filter by productTypeId or search by name)' })
   @ApiResponse({ status: 200, description: 'Product poses retrieved successfully' })
-  findAll(@Query('productTypeId') productTypeId?: string, @Query('search') search?: string) {
-    return this.service.findAll(productTypeId, search);
+  @ApiQuery({ name: 'productTypeId', required: false, type: String })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  async findAll(@Query('productTypeId') productTypeId?: string, @Query('search') search?: string) {
+    const result = await this.service.findAll(productTypeId, search);
+    return ResponseUtil.success(result, 'Product pose created successfully');
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a product pose by ID' })
   @ApiResponse({ status: 200, description: 'Product pose retrieved successfully' })
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const result = await this.service.findOne(id);
+    return ResponseUtil.success(result, 'Product pose retrieved successfully');
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a new product pose' })
   @ApiResponse({ status: 201, description: 'Product pose created successfully' })
-  create(@Body() dto: CreateProductPoseDto) {
-    return this.service.create(dto);
+  async create(@Body() dto: CreateProductPoseDto) {
+    const result = await this.service.create(dto);
+    return ResponseUtil.success(result, 'Product pose created successfully');
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a product pose by ID' })
   @ApiResponse({ status: 200, description: 'Product pose updated successfully' })
-  update(@Param('id') id: string, @Body() dto: UpdateProductPoseDto) {
-    return this.service.update(id, dto);
+  async update(@Param('id') id: string, @Body() dto: UpdateProductPoseDto) {
+    const result = await this.service.update(id, dto);
+    return ResponseUtil.success(result, 'Product pose updated successfully');
   }
 
   @Patch(':id/soft-delete')
   @ApiOperation({ summary: 'Soft delete a product pose by ID' })
   @ApiResponse({ status: 200, description: 'Product pose soft deleted successfully' })
-  softDelete(@Param('id') id: string) {
-    return this.service.softDelete(id);
+  async softDelete(@Param('id') id: string) {
+    const result = await this.service.softDelete(id);
+    return ResponseUtil.success(result, 'Product pose updated successfully');
   }
 }

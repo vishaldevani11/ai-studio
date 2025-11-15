@@ -84,7 +84,7 @@ export class ProductPosesService {
 
   async softDelete(id: string) {
     const pose = await this.findOne(id);
-    pose.isDeleted = true;
+    pose.isDeleted = !pose.isDeleted;
     return this.repo.save(pose);
   }
 }

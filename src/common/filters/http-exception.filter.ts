@@ -7,7 +7,11 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { ResponseUtil } from '../utils/response.util'; // make sure path is correct
 
+// ------------------------------------------------------
+// 1. HttpExceptionFilter (handles known NestJS exceptions)
+// ------------------------------------------------------
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
@@ -16,24 +20,27 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+
     const status = exception.getStatus();
+    const resp = exception.getResponse();
 
-    const errorResponse = {
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-      method: request.method,
-      message: exception.message || null,
-      requestId: (request as any).requestId || 'unknown',
-    };
+    const message = typeof resp === 'string' ? resp : (resp as any).message || exception.message;
 
-    // Log error details
-    this.logger.error(`${request.method} ${request.url}`, exception.stack, 'HttpExceptionFilter');
+    const requestId = (request as any).requestId || 'unknown';
+
+    // Log error
+    this.logger.error(`${request.method} ${request.url} -> ${message}`, exception.stack);
+
+    // Unified error response
+    const errorResponse = ResponseUtil.error(null, message, requestId);
 
     response.status(status).json(errorResponse);
   }
 }
 
+// ------------------------------------------------------
+// 2. AllExceptionsFilter (handles ALL unexpected errors)
+// ------------------------------------------------------
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
@@ -43,27 +50,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status =
-      exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+    const isHttpError = exception instanceof HttpException;
 
-    const message =
-      exception instanceof HttpException ? exception.message : 'Internal server error';
+    const status = isHttpError ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const errorResponse = {
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-      method: request.method,
-      message,
-      requestId: (request as any).requestId || 'unknown',
-    };
+    const message = isHttpError ? exception.message : 'Internal server error';
 
-    // Log error details
+    const requestId = (request as any).requestId || 'unknown';
+
+    // Log error
     this.logger.error(
-      `${request.method} ${request.url}`,
-      exception instanceof Error ? exception.stack : exception,
-      'AllExceptionsFilter',
+      `${request.method} ${request.url} -> ${message}`,
+      exception instanceof Error ? exception.stack : JSON.stringify(exception),
     );
+
+    // Unified error response
+    const errorResponse = ResponseUtil.error(null, message, requestId);
 
     response.status(status).json(errorResponse);
   }

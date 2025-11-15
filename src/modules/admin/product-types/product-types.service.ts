@@ -70,7 +70,7 @@ export class ProductTypesService {
 
   async softDelete(id: string) {
     const pt = await this.findOne(id);
-    pt.isDeleted = true;
+    pt.isDeleted = !pt.isDeleted;
     return this.repo.save(pt);
   }
 }
