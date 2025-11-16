@@ -1,11 +1,12 @@
-import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString, MinLength } from 'class-validator';
 
 export class RefreshTokenDto {
   @ApiProperty({
-    description: 'Refresh token',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+    description: 'Valid refresh token issued during login',
+    example: 'eyJh...your-refresh-token...',
   })
-  @IsString()
+  @IsString({ message: 'Refresh token must be a string' })
+  @MinLength(10, { message: 'Invalid refresh token format' })
   refreshToken: string;
 }

@@ -1,174 +1,32 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
-
-export class UserInfoDto {
-  @ApiProperty({
-    description: 'User ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  id: string;
-
-  @ApiProperty({
-    description: 'User email',
-    example: 'user@example.com',
-  })
-  email: string;
-
-  @ApiProperty({
-    description: 'User first name',
-    example: 'John',
-  })
-  firstName: string;
-
-  @ApiPropertyOptional({
-    description: 'User last name',
-    example: 'Doe',
-  })
-  lastName?: string;
-
-  @ApiPropertyOptional({
-    description: 'User phone number',
-    example: '+911234567890',
-  })
-  phone?: string;
-
-  @ApiProperty({
-    description: 'User role',
-    example: 'user',
-    enum: ['user', 'admin', 'super_admin'],
-  })
-  role: string;
-
-  @ApiProperty({
-    description: 'User status',
-    example: 'active',
-    enum: ['active', 'inactive', 'banned'],
-  })
-  status: string;
-
-  @ApiProperty({
-    description: 'Email verified status',
-    example: false,
-  })
-  emailVerified: boolean;
-
-  @ApiProperty({
-    description: 'Phone verified status',
-    example: false,
-  })
-  phoneVerified: boolean;
-
-  @ApiPropertyOptional({
-    description: 'Last login timestamp',
-    example: '2023-01-01T00:00:00.000Z',
-  })
-  lastLogin?: Date;
-
-  @ApiProperty({
-    description: 'User creation date',
-    example: '2023-01-01T00:00:00.000Z',
-  })
-  createdAt: Date;
-
-  @ApiProperty({
-    description: 'User last update date',
-    example: '2023-01-01T00:00:00.000Z',
-  })
-  updatedAt: Date;
-}
+import { ApiProperty } from '@nestjs/swagger';
+import { ProfileDto } from './profile.dto';
 
 export class AuthResponseDto {
   @ApiProperty({
-    description: 'Access token',
+    description: 'JWT access token for authenticated requests',
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
   accessToken: string;
 
   @ApiProperty({
-    description: 'Refresh token',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+    description: 'Refresh token for generating new access tokens',
+    example: 'eyJhRefreshToken...',
   })
   refreshToken: string;
 
   @ApiProperty({
-    description: 'User information',
-    type: UserInfoDto,
+    description: 'Access token expiry time (in seconds)',
+    example: 900,
   })
-  user: UserInfoDto;
-}
-
-export class UserResponseDto {
-  @ApiProperty({
-    description: 'User ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  id: string;
+  expiresIn: number;
 
   @ApiProperty({
-    description: 'User email',
-    example: 'user@example.com',
+    description: 'User profile details',
+    type: ProfileDto,
   })
-  email: string;
+  user: ProfileDto;
 
-  @ApiProperty({
-    description: 'User first name',
-    example: 'John',
-  })
-  firstName: string;
-
-  @ApiPropertyOptional({
-    description: 'User last name',
-    example: 'Doe',
-  })
-  lastName?: string;
-
-  @ApiPropertyOptional({
-    description: 'User phone number',
-    example: '+911234567890',
-  })
-  phone?: string;
-
-  @ApiProperty({
-    description: 'User role',
-    example: 'user',
-    enum: ['user', 'admin', 'super_admin'],
-  })
-  role: string;
-
-  @ApiProperty({
-    description: 'User status',
-    example: 'active',
-    enum: ['active', 'inactive', 'banned'],
-  })
-  status: string;
-
-  @ApiProperty({
-    description: 'Email verified status',
-    example: false,
-  })
-  emailVerified: boolean;
-
-  @ApiProperty({
-    description: 'Phone verified status',
-    example: false,
-  })
-  phoneVerified: boolean;
-
-  @ApiProperty({
-    description: 'User creation date',
-    example: '2023-01-01T00:00:00.000Z',
-  })
-  createdAt: Date;
-
-  @ApiProperty({
-    description: 'User last update date',
-    example: '2023-01-01T00:00:00.000Z',
-  })
-  updatedAt: Date;
-
-  @ApiPropertyOptional({
-    description: 'Last login timestamp',
-    example: '2023-01-01T00:00:00.000Z',
-  })
-  lastLogin?: Date;
+  constructor(partial: Partial<AuthResponseDto>) {
+    Object.assign(this, partial);
+  }
 }

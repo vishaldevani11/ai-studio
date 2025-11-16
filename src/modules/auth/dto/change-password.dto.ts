@@ -1,27 +1,25 @@
-import { IsString, MinLength, MaxLength, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString, MinLength, MaxLength, Matches } from 'class-validator';
 
 export class ChangePasswordDto {
   @ApiProperty({
-    description: 'Current password',
-    example: 'CurrentPassword123!',
+    description: 'Current password of the user',
+    example: 'OldPass@123',
   })
-  @IsString({ message: 'Current password must be a string' })
-  @MinLength(1, { message: 'Current password is required' })
-  currentPassword: string;
+  @IsString()
+  @MinLength(8)
+  @MaxLength(18)
+  oldPassword: string;
 
   @ApiProperty({
     description: 'New password',
-    example: 'NewSecurePassword123!',
-    minLength: 8,
-    maxLength: 100,
+    example: 'NewStrongPass@123',
   })
-  @IsString({ message: 'New password must be a string' })
-  @MinLength(8, { message: 'New password must be at least 8 characters long' })
-  @MaxLength(100, { message: 'New password must not exceed 100 characters' })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
-    message:
-      'New password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters long' })
+  @MaxLength(18, { message: 'Password must not exceed 18 characters' })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,18}$/, {
+    message: 'Password must include uppercase, lowercase, number, and special character',
   })
   newPassword: string;
 }

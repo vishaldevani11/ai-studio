@@ -1,22 +1,21 @@
-import { REFRESH_TOKEN_FIELD_NAME } from '../../../common/constants/auth.constants';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Strategy, ExtractJwt } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import { User } from '../../../database/entities/user.entity';
 import { AuthService } from '../auth.service';
+import { User } from '../../../database/entities/user.entity';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   constructor(
-    private configService: ConfigService,
+    private config: ConfigService,
     private authService: AuthService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromBodyField(REFRESH_TOKEN_FIELD_NAME),
+      jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'), // ✔ matches your DTO
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('app.jwt.refreshSecret'), // ⭐ FIXED
+      secretOrKey: config.get<string>('app.jwt.refreshSecret'), // ✔ updated path
       passReqToCallback: true,
     });
   }

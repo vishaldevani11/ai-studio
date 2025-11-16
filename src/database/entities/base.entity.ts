@@ -11,21 +11,21 @@ export abstract class BaseEntity extends TypeOrmBaseEntity {
   id: string;
 
   @CreateDateColumn({
-    type: 'timestamp',
+    type: 'timestamp with time zone',
     name: 'created_at',
   })
   createdAt: Date;
 
   @UpdateDateColumn({
-    type: 'timestamp',
+    type: 'timestamp with time zone',
     name: 'updated_at',
   })
   updatedAt: Date;
 
   @DeleteDateColumn({
-    type: 'timestamp',
+    type: 'timestamp with time zone',
     name: 'deleted_at',
     nullable: true,
   })
-  deletedAt: Date | null;
+  deletedAt?: Date | null;
 }

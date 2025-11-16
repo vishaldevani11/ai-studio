@@ -1,4 +1,4 @@
-import { IsString, IsOptional, MaxLength, IsEnum, IsUrl, ValidateIf } from 'class-validator';
+import { IsString, IsOptional, MaxLength, IsEnum, IsUrl } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { BusinessType, BusinessSegment } from '../../../database/entities/user-business.entity';
 
@@ -15,7 +15,7 @@ export class BusinessDto {
 
   @ApiPropertyOptional({
     description: 'Business type',
-    example: 'manufacturer',
+    example: BusinessType.MANUFACTURER,
     enum: BusinessType,
   })
   @IsOptional()
@@ -25,8 +25,8 @@ export class BusinessDto {
   businessType?: BusinessType;
 
   @ApiPropertyOptional({
-    description: 'Business segment',
-    example: 'clothing',
+    description: 'Business segment category',
+    example: BusinessSegment.CLOTHING,
     enum: BusinessSegment,
   })
   @IsOptional()
@@ -37,8 +37,8 @@ export class BusinessDto {
   businessSegment?: BusinessSegment;
 
   @ApiPropertyOptional({
-    description: 'Business description',
-    example: 'We manufacture high-quality clothing items',
+    description: 'Description of the business',
+    example: 'We manufacture high-quality clothing products.',
   })
   @IsOptional()
   @IsString({ message: 'Business description must be a string' })
@@ -47,28 +47,25 @@ export class BusinessDto {
   @ApiPropertyOptional({
     description: 'GST number',
     example: '27ABCDE1234F1Z5',
-    maxLength: 20,
   })
   @IsOptional()
-  @IsString({ message: 'GST number must be a string' })
-  @MaxLength(20, { message: 'GST number must not exceed 20 characters' })
+  @IsString()
+  @MaxLength(20)
   gstNumber?: string;
 
   @ApiPropertyOptional({
-    description: 'Website URL',
+    description: 'Official business website URL',
     example: 'https://www.example.com',
   })
   @IsOptional()
-  @ValidateIf(o => o.websiteUrl !== undefined && o.websiteUrl !== null)
   @IsUrl({}, { message: 'Please provide a valid website URL' })
   websiteUrl?: string;
 
   @ApiPropertyOptional({
-    description: 'Business logo URL',
+    description: 'URL of the business logo',
     example: 'https://www.example.com/logo.png',
   })
   @IsOptional()
-  @ValidateIf(o => o.businessLogo !== undefined && o.businessLogo !== null)
   @IsUrl({}, { message: 'Please provide a valid logo URL' })
   businessLogo?: string;
 }

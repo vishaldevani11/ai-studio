@@ -13,16 +13,17 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { ProfileDto } from './dto/profile.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
+import { JwtRefreshGuard } from '../../common/guards/jwt-refresh.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { RateLimit } from '../../security/decorators/rate-limit.decorator';
@@ -35,166 +36,130 @@ import { ResponseUtil } from '../../common/utils/response.util';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // -----------------------------------------------------
+  // REGISTER
+  // -----------------------------------------------------
   @Public()
   @Post(ROUTES.AUTH.REGISTER)
-  @RateLimit({ limit: 10, window: 60 * 15 }) // 10 requests per 15 minutes
+  @RateLimit({ limit: 10, window: 60 * 15 })
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: RegisterDto })
-  @ApiResponse({
-    status: 201,
-    description: 'User successfully registered',
-    type: AuthResponseDto,
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'User with this email already exists',
-  })
+  @ApiResponse({ status: 201, description: 'User successfully registered', type: AuthResponseDto })
   async register(@Body() registerDto: RegisterDto) {
     const result = await this.authService.register(registerDto);
     return ResponseUtil.success(result, 'User registered successfully');
   }
 
+  // -----------------------------------------------------
+  // LOGIN
+  // -----------------------------------------------------
   @Public()
   @Post(ROUTES.AUTH.LOGIN)
-  @RateLimit({ limit: 10, window: 60 * 15 }) // 10 requests per 15 minutes
+  @RateLimit({ limit: 10, window: 60 * 15 })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login user' })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({
-    status: 200,
-    description: 'User successfully logged in',
-    type: AuthResponseDto,
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Invalid credentials',
-  })
+  @ApiResponse({ status: 200, description: 'User successfully logged in', type: AuthResponseDto })
   async login(@Body() loginDto: LoginDto) {
     const result = await this.authService.login(loginDto);
     return ResponseUtil.success(result, 'User logged in successfully');
   }
 
+  // -----------------------------------------------------
+  // REFRESH TOKEN
+  // -----------------------------------------------------
   @Public()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtRefreshGuard)
   @Post(ROUTES.AUTH.REFRESH)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token' })
-  @ApiBody({ type: RefreshTokenDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Token refreshed successfully',
-    type: AuthResponseDto,
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Invalid refresh token',
-  })
-  async refresh(@CurrentUser() user: User, @Body() refreshTokenDto: RefreshTokenDto) {
-    return this.authService.refreshToken(user.id, refreshTokenDto.refreshToken);
+  @ApiResponse({ status: 200, description: 'Token refreshed successfully', type: AuthResponseDto })
+  async refresh(@CurrentUser() user: User) {
+    const result = await this.authService.refreshToken(user.id, user.refreshToken);
+    return ResponseUtil.success(result, 'Token refreshed successfully');
   }
 
-  @UseGuards(JwtAuthGuard)
+  // -----------------------------------------------------
+  // LOGOUT
+  // -----------------------------------------------------
+  @Public()
+  @UseGuards(JwtRefreshGuard)
   @Post(ROUTES.AUTH.LOGOUT)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout user' })
-  @ApiResponse({
-    status: 200,
-    description: 'User successfully logged out',
-  })
   async logout(@CurrentUser() user: User) {
     await this.authService.logout(user.id);
     return ResponseUtil.success(null, 'User logged out successfully');
   }
 
+  // -----------------------------------------------------
+  // FORGOT PASSWORD
+  // -----------------------------------------------------
   @Public()
   @Post('forgot-password')
-  @RateLimit({ limit: 5, window: 60 * 10 }) // 5 requests per 10 minutes
+  @RateLimit({ limit: 5, window: 60 * 10 })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request a password reset' })
   @ApiBody({ type: ForgotPasswordDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Password reset instructions sent if the email is valid',
-  })
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     await this.authService.forgotPassword(forgotPasswordDto.email);
     return ResponseUtil.success(null, 'Password reset instructions sent if the email is valid');
   }
 
+  // -----------------------------------------------------
+  // RESET PASSWORD
+  // -----------------------------------------------------
   @Public()
   @Post('reset-password')
-  @RateLimit({ limit: 5, window: 60 * 10 }) // 5 requests per 10 minutes
+  @RateLimit({ limit: 5, window: 60 * 10 })
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Reset a password with a valid token' })
+  @ApiOperation({ summary: 'Reset password' })
   @ApiBody({ type: ResetPasswordDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Password has been successfully reset',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid or expired password reset token',
-  })
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    await this.authService.resetPassword(resetPasswordDto.token, resetPasswordDto.newPassword);
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto.resetToken, dto.newPassword);
     return ResponseUtil.success(null, 'Password has been successfully reset');
   }
 
-  @UseGuards(JwtAuthGuard)
+  // -----------------------------------------------------
+  // GET PROFILE
+  // -----------------------------------------------------
+  @UseGuards(JwtRefreshGuard)
   @Get(ROUTES.AUTH.PROFILE)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get current user profile with related data' })
-  @ApiResponse({
-    status: 200,
-    description: 'User profile retrieved successfully',
-    type: ProfileDto,
-  })
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, type: ProfileDto })
   async getProfile(@CurrentUser() user: User) {
     const userProfile = await this.authService.getProfile(user.id);
     return ResponseUtil.success(userProfile, 'Profile retrieved successfully');
   }
 
-  @UseGuards(JwtAuthGuard)
+  // -----------------------------------------------------
+  // UPDATE PROFILE
+  // -----------------------------------------------------
+  @UseGuards(JwtRefreshGuard)
   @Patch(ROUTES.AUTH.PROFILE)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update current user profile (partial update)' })
+  @ApiOperation({ summary: 'Update user profile' })
   @ApiBody({ type: UpdateProfileDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Profile updated successfully',
-    type: ProfileDto,
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'Phone number already in use',
-  })
-  async updateProfile(@CurrentUser() user: User, @Body() updateProfileDto: UpdateProfileDto) {
-    const updatedUser = await this.authService.updateProfile(user.id, updateProfileDto);
+  @ApiResponse({ status: 200, type: ProfileDto })
+  async updateProfile(@CurrentUser() user: User, @Body() dto: UpdateProfileDto) {
+    const updatedUser = await this.authService.updateProfile(user.id, dto);
     return ResponseUtil.success(updatedUser, 'Profile updated successfully');
   }
 
-  @UseGuards(JwtAuthGuard)
+  // -----------------------------------------------------
+  // CHANGE PASSWORD
+  // -----------------------------------------------------
+  @UseGuards(JwtRefreshGuard)
   @Patch('change-password')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Change current user password' })
+  @ApiOperation({ summary: 'Change password' })
   @ApiBody({ type: ChangePasswordDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Password changed successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Current password is incorrect or new password is same as current',
-  })
-  async changePassword(@CurrentUser() user: User, @Body() changePasswordDto: ChangePasswordDto) {
-    await this.authService.changePassword(
-      user.id,
-      changePasswordDto.currentPassword,
-      changePasswordDto.newPassword,
-    );
+  async changePassword(@CurrentUser() user: User, @Body() dto: ChangePasswordDto) {
+    await this.authService.changePassword(user.id, dto.oldPassword, dto.newPassword);
     return ResponseUtil.success(null, 'Password changed successfully');
   }
 }

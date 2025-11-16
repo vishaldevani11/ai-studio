@@ -17,10 +17,10 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('app.jwt.secret'),
+      useFactory: async (config: ConfigService) => ({
+        secret: config.get('app.jwt.secret'),
         signOptions: {
-          expiresIn: configService.get('app.jwt.expiresIn'),
+          expiresIn: config.get('app.jwt.expiresIn'),
         },
       }),
       inject: [ConfigService],

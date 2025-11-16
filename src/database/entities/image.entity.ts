@@ -1,6 +1,5 @@
 import { Entity, Column } from 'typeorm';
 import { BaseEntity } from './base.entity';
-//import { User } from './user.entity';
 
 @Entity('images')
 export class Image extends BaseEntity {
@@ -8,7 +7,7 @@ export class Image extends BaseEntity {
   title: string;
 
   @Column({ nullable: true })
-  description: string;
+  description?: string;
 
   @Column()
   prompt: string;
@@ -25,15 +24,11 @@ export class Image extends BaseEntity {
   @Column()
   mimeType: string;
 
-  @Column({ nullable: true })
-  metadata: string; // JSON string for additional metadata
+  @Column({ type: 'jsonb', nullable: true })
+  metadata?: any;
 
   @Column({ default: false })
   isPublic: boolean;
-
-  // @ManyToOne(() => User, (user) => user.images, { onDelete: 'CASCADE' })
-  // @JoinColumn({ name: 'userId' })
-  // user: User;
 
   @Column()
   userId: string;

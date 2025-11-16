@@ -1,4 +1,4 @@
-import { Entity, Column, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, OneToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { User } from './user.entity';
 
@@ -23,7 +23,7 @@ export class UserBusiness extends BaseEntity {
   userId: string;
 
   @Column({ name: 'business_name', length: 150, nullable: true })
-  businessName: string;
+  businessName?: string;
 
   @Column({
     name: 'business_type',
@@ -31,7 +31,7 @@ export class UserBusiness extends BaseEntity {
     enum: BusinessType,
     nullable: true,
   })
-  businessType: BusinessType;
+  businessType?: BusinessType;
 
   @Column({
     name: 'business_segment',
@@ -39,33 +39,19 @@ export class UserBusiness extends BaseEntity {
     enum: BusinessSegment,
     nullable: true,
   })
-  businessSegment: BusinessSegment;
+  businessSegment?: BusinessSegment;
 
   @Column({ name: 'business_description', type: 'text', nullable: true })
-  businessDescription: string;
+  businessDescription?: string;
 
   @Column({ name: 'gst_number', length: 20, nullable: true })
-  gstNumber: string;
+  gstNumber?: string;
 
   @Column({ name: 'website_url', type: 'text', nullable: true })
-  websiteUrl: string;
+  websiteUrl?: string;
 
   @Column({ name: 'business_logo', type: 'text', nullable: true })
-  businessLogo: string;
-
-  @CreateDateColumn({
-    name: 'created_at',
-    type: 'timestamp with time zone',
-    default: () => 'NOW()',
-  })
-  createdAt: Date;
-
-  @UpdateDateColumn({
-    name: 'updated_at',
-    type: 'timestamp with time zone',
-    default: () => 'NOW()',
-  })
-  updatedAt: Date;
+  businessLogo?: string;
 
   @OneToOne(() => User, user => user.business, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })

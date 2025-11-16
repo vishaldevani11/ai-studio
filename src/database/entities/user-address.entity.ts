@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { User } from './user.entity';
 
@@ -11,33 +11,19 @@ export class UserAddress extends BaseEntity {
   addressType: string;
 
   @Column({ name: 'street', length: 255, nullable: true })
-  street: string;
+  street?: string;
 
   @Column({ name: 'city', length: 100, nullable: true })
-  city: string;
+  city?: string;
 
   @Column({ name: 'state', length: 100, nullable: true })
-  state: string;
+  state?: string;
 
   @Column({ name: 'zipcode', length: 20, nullable: true })
-  zipcode: string;
+  zipcode?: string;
 
   @Column({ name: 'country', length: 100, default: 'India' })
   country: string;
-
-  @CreateDateColumn({
-    name: 'created_at',
-    type: 'timestamp with time zone',
-    default: () => 'NOW()',
-  })
-  createdAt: Date;
-
-  @UpdateDateColumn({
-    name: 'updated_at',
-    type: 'timestamp with time zone',
-    default: () => 'NOW()',
-  })
-  updatedAt: Date;
 
   @ManyToOne(() => User, user => user.addresses, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })

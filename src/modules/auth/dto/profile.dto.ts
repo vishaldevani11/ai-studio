@@ -1,77 +1,60 @@
-import { Expose, Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
-import { AddressDto } from './address.dto';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BusinessDto } from './business.dto';
-import { UserStatus, UserRole } from '@/database/entities/user.entity';
+import { UserRole, UserStatus } from '../../../database/entities/user.entity';
 
 export class ProfileDto {
   @ApiProperty({ description: "User's unique identifier" })
-  @Expose()
   id: string;
 
   @ApiProperty({ description: "User's email address" })
-  @Expose()
   email: string;
 
   @ApiProperty({ description: "User's first name" })
-  @Expose()
   firstName: string;
 
-  @ApiProperty({ description: "User's last name", required: false })
-  @Expose()
+  @ApiPropertyOptional({ description: "User's last name" })
   lastName?: string;
 
-  @ApiProperty({ description: "User's phone number", required: false })
-  @Expose()
+  @ApiPropertyOptional({
+    description: 'User phone number (Indian format +91)',
+    example: '+919876543210',
+  })
   phone?: string;
 
-  @ApiProperty({ enum: UserRole, description: "User's role" })
-  @Expose()
-  role: UserRole;
-
-  @ApiProperty({ enum: UserStatus, description: "User's status" })
-  @Expose()
-  status: UserStatus;
-
-  @ApiProperty({ description: 'Indicates if the email is verified' })
-  @Expose()
-  emailVerified: boolean;
-
-  @ApiProperty({ description: 'Indicates if the phone is verified' })
-  @Expose()
-  phoneVerified: boolean;
-
-  @ApiProperty({ description: 'URL of the profile image', required: false })
-  @Expose()
+  @ApiPropertyOptional({
+    description: 'User profile image URL (optional)',
+  })
   profileImage?: string;
 
-  @ApiProperty({ description: 'Last login timestamp', required: false })
-  @Expose()
-  lastLogin?: Date;
-
-  @ApiProperty({ description: 'User referral code', required: false })
-  @Expose()
-  referralCode?: string;
-
-  @ApiProperty({ description: 'Creation timestamp' })
-  @Expose()
-  createdAt: Date;
-
-  @ApiProperty({ description: 'Last update timestamp' })
-  @Expose()
-  updatedAt: Date;
-
-  @ApiProperty({ type: () => [AddressDto], description: "User's addresses" })
-  @Expose()
-  @Type(() => AddressDto)
-  addresses: AddressDto[];
+  @ApiProperty({
+    description: 'User role',
+    enum: UserRole,
+  })
+  role: UserRole;
 
   @ApiProperty({
-    type: () => BusinessDto,
-    description: "User's business information",
-    required: false,
+    description: 'User account status',
+    enum: UserStatus,
   })
-  @Expose()
-  @Type(() => BusinessDto)
+  status: UserStatus;
+
+  @ApiPropertyOptional({
+    description: 'Business details associated with the user',
+    type: BusinessDto,
+  })
   business?: BusinessDto;
+
+  @ApiPropertyOptional({
+    description: 'Date and time user was created',
+  })
+  createdAt?: Date;
+
+  @ApiPropertyOptional({
+    description: 'Date and time user was last updated',
+  })
+  updatedAt?: Date;
+
+  constructor(partial: Partial<ProfileDto>) {
+    Object.assign(this, partial);
+  }
 }

@@ -1,6 +1,5 @@
-import { Entity, Column, OneToMany, CreateDateColumn, UpdateDateColumn, OneToOne } from 'typeorm';
+import { Entity, Column, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity } from './base.entity';
-//import { Image } from './image.entity';
 import { UserAddress } from './user-address.entity';
 import { UserBusiness } from './user-business.entity';
 
@@ -22,7 +21,7 @@ export class User extends BaseEntity {
   firstName: string;
 
   @Column({ name: 'last_name', length: 100, nullable: true })
-  lastName: string;
+  lastName?: string;
 
   @Column({ name: 'email', unique: true, length: 150 })
   email: string;
@@ -31,10 +30,10 @@ export class User extends BaseEntity {
   passwordHash: string;
 
   @Column({ name: 'phone', length: 20, nullable: true })
-  phone: string;
+  phone?: string;
 
   @Column({ name: 'profile_image', type: 'text', nullable: true })
-  profileImage: string;
+  profileImage?: string;
 
   @Column({ name: 'email_verified', default: false })
   emailVerified: boolean;
@@ -58,26 +57,13 @@ export class User extends BaseEntity {
   })
   status: UserStatus;
 
-  @CreateDateColumn({
-    name: 'created_at',
-    type: 'timestamp with time zone',
-    default: () => 'NOW()',
-  })
-  createdAt: Date;
-
-  @UpdateDateColumn({
-    name: 'updated_at',
-    type: 'timestamp with time zone',
-    default: () => 'NOW()',
-  })
-  updatedAt: Date;
-
   @Column({ name: 'last_login', type: 'timestamp with time zone', nullable: true })
-  lastLogin: Date;
+  lastLogin?: Date;
 
   @Column({ name: 'referral_code', length: 50, nullable: true })
-  referralCode: string;
+  referralCode?: string;
 
+  // Stored hashed — for security
   @Column({ type: 'varchar', length: 255, nullable: true, select: false })
   refreshToken?: string;
 
@@ -93,6 +79,6 @@ export class User extends BaseEntity {
   @OneToMany(() => UserAddress, address => address.user, { cascade: true })
   addresses: UserAddress[];
 
-  @OneToOne(() => UserBusiness, business => business.user)
-  business: UserBusiness;
+  @OneToOne(() => UserBusiness, business => business.user, { cascade: true })
+  business?: UserBusiness;
 }

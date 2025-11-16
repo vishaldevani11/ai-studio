@@ -1,67 +1,58 @@
-import { IsString, IsOptional, MaxLength, IsIn } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class AddressDto {
   @ApiPropertyOptional({
-    description: 'Address type',
-    example: 'billing',
-    enum: ['default', 'billing', 'shipping'],
+    description: 'Address type (e.g., home, office)',
+    example: 'home',
   })
   @IsOptional()
   @IsString()
-  @IsIn(['default', 'billing', 'shipping'], {
-    message: 'Address type must be one of: default, billing, shipping',
-  })
+  @MaxLength(50)
   addressType?: string;
 
   @ApiPropertyOptional({
-    description: 'Street address',
-    example: '123 Main Street',
-    maxLength: 255,
+    description: 'Street / area',
+    example: 'MG Road',
   })
   @IsOptional()
-  @IsString({ message: 'Street must be a string' })
-  @MaxLength(255, { message: 'Street must not exceed 255 characters' })
+  @IsString()
+  @MaxLength(255)
   street?: string;
 
   @ApiPropertyOptional({
-    description: 'City',
+    description: 'City name',
     example: 'Mumbai',
-    maxLength: 100,
   })
   @IsOptional()
-  @IsString({ message: 'City must be a string' })
-  @MaxLength(100, { message: 'City must not exceed 100 characters' })
+  @IsString()
+  @MaxLength(100)
   city?: string;
 
   @ApiPropertyOptional({
-    description: 'State',
+    description: 'State name',
     example: 'Maharashtra',
-    maxLength: 100,
   })
   @IsOptional()
-  @IsString({ message: 'State must be a string' })
-  @MaxLength(100, { message: 'State must not exceed 100 characters' })
+  @IsString()
+  @MaxLength(100)
   state?: string;
 
   @ApiPropertyOptional({
-    description: 'Zip/Postal code',
+    description: 'Zipcode / PIN code',
     example: '400001',
-    maxLength: 20,
   })
   @IsOptional()
-  @IsString({ message: 'Zipcode must be a string' })
-  @MaxLength(20, { message: 'Zipcode must not exceed 20 characters' })
+  @IsString()
+  @MaxLength(20)
   zipcode?: string;
 
   @ApiPropertyOptional({
-    description: 'Country',
+    description: 'Country name',
     example: 'India',
-    maxLength: 100,
-    default: 'India',
   })
   @IsOptional()
-  @IsString({ message: 'Country must be a string' })
-  @MaxLength(100, { message: 'Country must not exceed 100 characters' })
+  @IsString()
+  @MaxLength(100)
   country?: string;
 }
