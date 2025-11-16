@@ -4,6 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import * as compression from 'compression';
+import * as bodyParser from 'body-parser';
 import { AppModule } from './app.module';
 import { ValidationErrorUtil } from './common/utils/validation-error.util';
 import { API_PREFIX, API_VERSION, ROUTES } from './common/constants';
@@ -11,6 +12,10 @@ import { API_PREFIX, API_VERSION, ROUTES } from './common/constants';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  // Increase body limit for Base64 images
+  app.use(bodyParser.json({ limit: '20mb' }));
+  app.use(bodyParser.urlencoded({ limit: '20mb', extended: true }));
 
   // Security middleware
   if (configService.get('app.security.helmetEnabled')) {
@@ -40,7 +45,6 @@ async function bootstrap() {
       exceptionFactory: errors => {
         const formattedErrors = ValidationErrorUtil.format(errors);
 
-        // Return BadRequestException with formatted error structure
         return new BadRequestException({
           message: formattedErrors.message,
           errors: formattedErrors.errors,

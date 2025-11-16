@@ -22,9 +22,8 @@ export class ProductPose {
   @Column({ nullable: true, type: 'text' })
   description?: string;
 
-  // store image url or local file path (decide in your uploader)
-  @Column({ name: 'image_url', nullable: true, type: 'text' })
-  imageUrl?: string;
+  @Column({ name: 'image_base64', type: 'text' })
+  imageBase64: string; // required
 
   @ManyToOne(() => ProductType, pt => pt.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_type_id' })

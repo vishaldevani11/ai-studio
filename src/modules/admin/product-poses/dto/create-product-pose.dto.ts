@@ -12,10 +12,9 @@ export class CreateProductPoseDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ example: 'https://cdn.example.com/product-poses/look-left.png', required: false })
-  @IsOptional()
+  @ApiProperty({ example: 'data:image/png;base64,...', required: true })
   @IsString()
-  imageUrl?: string;
+  imageBase64: string;
 
   @ApiProperty({ example: 'uuid-of-product-type', description: 'Associated product type ID' })
   @IsUUID()

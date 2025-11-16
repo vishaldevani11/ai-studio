@@ -21,13 +21,19 @@ export class ProductPosesService {
     });
     if (!productType) throw new NotFoundException('Product type not found');
 
-    // uniqueness per productType (optional, but useful)
+    if (!dto.imageBase64) throw new BadRequestException('Base64 image is required');
+
     const exists = await this.repo.findOne({
       where: { name: dto.name, productTypeId: dto.productTypeId, isDeleted: false },
     });
     if (exists) throw new BadRequestException('Product pose already exists for this product type');
 
-    const entity = this.repo.create({ ...dto, productType });
+    const entity = this.repo.create({
+      ...dto,
+      imageBase64: dto.imageBase64,
+      productType,
+    });
+
     return this.repo.save(entity);
   }
 
@@ -64,7 +70,6 @@ export class ProductPosesService {
       pose.productTypeId = dto.productTypeId;
     }
 
-    // If name changes, optionally enforce uniqueness per productType again
     if (dto.name) {
       const duplicate = await this.repo.findOne({
         where: {
@@ -77,8 +82,11 @@ export class ProductPosesService {
         throw new BadRequestException('Product pose already exists for this product type');
       }
     }
-
-    Object.assign(pose, dto);
+    pose.name = dto.name ?? pose.name;
+    pose.description = dto.description ?? pose.description;
+    if (dto.imageBase64) {
+      pose.imageBase64 = dto.imageBase64;
+    }
     return this.repo.save(pose);
   }
 

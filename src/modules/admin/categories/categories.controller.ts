@@ -19,7 +19,7 @@ import { ResponseUtil } from '@/common/utils/response.util';
 @ApiTags('Admin - Categories')
 @Controller(ROUTES.ADMIN.CATEGORIES)
 export class CategoriesController {
-  constructor(private readonly service: CategoriesService) { }
+  constructor(private readonly service: CategoriesService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all categories (optionally filtered by industry or name)' })

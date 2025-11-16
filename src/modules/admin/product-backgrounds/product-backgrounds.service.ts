@@ -16,16 +16,23 @@ export class ProductBackgroundsService {
   ) {}
 
   async create(dto: CreateProductBackgroundDto) {
+    if (!dto.imageBase64) throw new BadRequestException('Base64 image is required');
+
+    const exists = await this.repo.findOne({
+      where: { name: dto.name, isDeleted: false },
+    });
+    if (exists) throw new BadRequestException('Product background with this name already exists');
+
     const productThemes = dto.productThemeIds
       ? await this.productThemeRepo.findByIds(dto.productThemeIds)
       : [];
 
-    if (!dto.imageUrl) throw new BadRequestException('Image URL is required');
+    const entity = this.repo.create({
+      ...dto,
+      imageBase64: dto.imageBase64,
+      productThemes,
+    });
 
-    const exists = await this.repo.findOne({ where: { name: dto.name, isDeleted: false } });
-    if (exists) throw new BadRequestException('Product background with this name already exists');
-
-    const entity = this.repo.create({ ...dto, productThemes });
     return this.repo.save(entity);
   }
 
@@ -59,7 +66,18 @@ export class ProductBackgroundsService {
     if (dto.productThemeIds) {
       productBackground.productThemes = await this.productThemeRepo.findByIds(dto.productThemeIds);
     }
-    Object.assign(productBackground, dto);
+    if (dto.imageBase64) {
+      productBackground.imageBase64 = dto.imageBase64;
+    }
+
+    if (dto.productThemeIds) {
+      productBackground.productThemes = await this.productThemeRepo.findByIds(dto.productThemeIds);
+    }
+
+    productBackground.name = dto.name ?? productBackground.name;
+    productBackground.description = dto.description ?? productBackground.description;
+
+    return this.repo.save(productBackground);
     return this.repo.save(productBackground);
   }
 

@@ -21,8 +21,8 @@ export class ProductBackground {
   @Column({ nullable: true, type: 'text' })
   description?: string;
 
-  @Column({ name: 'image_url', type: 'text' })
-  imageUrl: string;
+  @Column({ name: 'image_base64', type: 'text' })
+  imageBase64: string;
 
   @ManyToMany(() => ProductTheme, pt => pt.productBackgrounds)
   productThemes: ProductTheme[];

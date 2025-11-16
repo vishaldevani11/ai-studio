@@ -1,4 +1,4 @@
-import { IsString, IsOptional, Length, IsUrl, IsArray, IsUUID } from 'class-validator';
+import { IsString, IsOptional, Length, IsArray, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductBackgroundDto {
@@ -15,10 +15,9 @@ export class CreateProductBackgroundDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ example: 'https://cdn.example.com/product-backgrounds/forest.png' })
+  @ApiProperty({ example: 'data:image/png;base64,...', required: true })
   @IsString()
-  @IsUrl()
-  imageUrl: string;
+  imageBase64: string;
 
   @ApiProperty({ example: ['uuid-of-product-theme'], required: false })
   @IsOptional()
