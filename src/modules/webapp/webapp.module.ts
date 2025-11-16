@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WebAppController } from './webapp.controller';
 import { WebAppService } from './webapp.service';
-import { Industry } from '../admin/industries/industry.entity';
-import { Category } from '../admin/categories/category.entity';
-import { ProductType } from '../admin/product-types/product-type.entity';
-import { ProductBackground } from '../admin/product-backgrounds/product-background.entity';
-import { ProductTheme } from '../admin/product-themes/product-theme.entity';
+import { Industry } from '../../database/entities/industry.entity';
+import { Category } from '../../database/entities/category.entity';
+import { ProductType } from '../../database/entities/product-type.entity';
+import { ProductBackground } from '../../database/entities/product-background.entity';
+import { ProductTheme } from '../../database/entities/product-theme.entity';
 
 @Module({
   imports: [

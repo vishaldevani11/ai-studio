@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
-import { Industry } from './industry.entity';
+import { Industry } from '../../../database/entities/industry.entity';
 import { CreateIndustryDto } from './dto/create-industry.dto';
 import { UpdateIndustryDto } from './dto/update-industry.dto';
 
@@ -13,7 +13,7 @@ export class IndustriesService {
   ) {}
 
   async findAll(search?: string) {
-    const where = search ? { name: ILike(`%${search}%`), isDeleted: false } : { isDeleted: false };
+    const where = search ? { name: ILike(`%${search}%`) } : {};
 
     return this.repo.find({
       where,
@@ -22,7 +22,7 @@ export class IndustriesService {
   }
 
   async findOne(id: string) {
-    const industry = await this.repo.findOne({ where: { id, isDeleted: false } });
+    const industry = await this.repo.findOne({ where: { id } });
     return industry;
   }
 
@@ -38,8 +38,23 @@ export class IndustriesService {
   }
 
   async softDelete(id: string) {
-    const industry = await this.findOne(id);
-    industry.isDeleted = !industry.isDeleted;
-    return this.repo.save(industry);
+    // Fetch entity including deleted ones
+    const entity = await this.repo.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+
+    if (!entity) {
+      throw new NotFoundException('Industry not found');
+    }
+
+    // Toggle delete/restore (just like boolean flip)
+    if (entity.deletedAt) {
+      await this.repo.restore(id);
+    } else {
+      await this.repo.softDelete(id);
+    }
+    // Load updated entity to return (same as your old code did)
+    return this.repo.findOne({ where: { id } });
   }
 }

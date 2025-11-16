@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
-import { ProductTheme } from './product-theme.entity';
+import { ProductTheme } from '../../../database/entities/product-theme.entity';
 import { CreateProductThemeDto } from './dto/create-product-theme.dto';
 import { UpdateProductThemeDto } from './dto/update-product-theme.dto';
-import { ProductType } from '../product-types/product-type.entity';
+import { ProductType } from '../../../database/entities/product-type.entity';
 
 @Injectable()
 export class ProductThemesService {
@@ -13,7 +13,7 @@ export class ProductThemesService {
     private readonly repo: Repository<ProductTheme>,
     @InjectRepository(ProductType)
     private readonly productTypeRepo: Repository<ProductType>,
-  ) {}
+  ) { }
 
   async create(dto: CreateProductThemeDto) {
     const productTypes = dto.productTypeIds
@@ -25,7 +25,7 @@ export class ProductThemesService {
   }
 
   async findAll(search?: string) {
-    const where: any = { isDeleted: false };
+    const where: any = {};
     if (search) where.name = ILike(`%${search}%`);
 
     return this.repo.find({
@@ -37,7 +37,7 @@ export class ProductThemesService {
 
   async findOne(id: string) {
     const productTheme = await this.repo.findOne({
-      where: { id, isDeleted: false },
+      where: { id },
       relations: ['productTypes', 'productBackgrounds'],
     });
     if (!productTheme) throw new NotFoundException('Product theme not found');
@@ -54,8 +54,24 @@ export class ProductThemesService {
   }
 
   async softDelete(id: string) {
-    const productTheme = await this.findOne(id);
-    productTheme.isDeleted = !productTheme.isDeleted;
-    return this.repo.save(productTheme);
+    // Load including soft-deleted themes
+    const theme = await this.repo.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+
+    if (!theme) {
+      throw new NotFoundException('Product theme not found');
+    }
+
+    // Toggle soft-delete and restore
+    if (theme.deletedAt) {
+      await this.repo.restore(id);
+    } else {
+      await this.repo.softDelete(id);
+    }
+
+    // Return updated entity (same behavior as before)
+    return this.repo.findOne({ where: { id } });
   }
 }

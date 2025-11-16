@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
-import { ProductBackground } from './product-background.entity';
+import { ProductBackground } from '../../../database/entities/product-background.entity';
 import { CreateProductBackgroundDto } from './dto/create-product-background.dto';
 import { UpdateProductBackgroundDto } from './dto/update-product-background.dto';
-import { ProductTheme } from '../product-themes/product-theme.entity';
+import { ProductTheme } from '../../../database/entities/product-theme.entity';
 
 @Injectable()
 export class ProductBackgroundsService {
@@ -19,7 +19,7 @@ export class ProductBackgroundsService {
     if (!dto.imageBase64) throw new BadRequestException('Base64 image is required');
 
     const exists = await this.repo.findOne({
-      where: { name: dto.name, isDeleted: false },
+      where: { name: dto.name },
     });
     if (exists) throw new BadRequestException('Product background with this name already exists');
 
@@ -37,7 +37,7 @@ export class ProductBackgroundsService {
   }
 
   async findAll(search?: string, productThemeId?: string) {
-    const where: any = { isDeleted: false };
+    const where: any = {};
     if (search) where.name = ILike(`%${search}%`);
 
     const qb = this.repo
@@ -54,7 +54,7 @@ export class ProductBackgroundsService {
 
   async findOne(id: string) {
     const productBackground = await this.repo.findOne({
-      where: { id, isDeleted: false },
+      where: { id },
       relations: ['productThemes'],
     });
     if (!productBackground) throw new NotFoundException('Product background not found');
@@ -82,8 +82,24 @@ export class ProductBackgroundsService {
   }
 
   async softDelete(id: string) {
-    const productBackground = await this.findOne(id);
-    productBackground.isDeleted = !productBackground.isDeleted;
-    return this.repo.save(productBackground);
+    // Find the item including soft-deleted ones
+    const entity = await this.repo.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+
+    if (!entity) {
+      throw new NotFoundException('Product background not found');
+    }
+
+    // Toggle delete/restore (same behavior as flipping a boolean)
+    if (entity.deletedAt) {
+      await this.repo.restore(id);
+    } else {
+      await this.repo.softDelete(id);
+    }
+
+    // Return updated entity (same as before)
+    return this.repo.findOne({ where: { id } });
   }
 }

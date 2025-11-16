@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
-import { ProductPose } from './product-pose.entity';
+import { ProductPose } from '../../../database/entities/product-pose.entity';
 import { CreateProductPoseDto } from './dto/create-product-pose.dto';
 import { UpdateProductPoseDto } from './dto/update-product-pose.dto';
-import { ProductType } from '../product-types/product-type.entity';
+import { ProductType } from '../../../database/entities/product-type.entity';
 
 @Injectable()
 export class ProductPosesService {
@@ -17,14 +17,14 @@ export class ProductPosesService {
 
   async create(dto: CreateProductPoseDto) {
     const productType = await this.productTypeRepo.findOne({
-      where: { id: dto.productTypeId, isDeleted: false },
+      where: { id: dto.productTypeId },
     });
     if (!productType) throw new NotFoundException('Product type not found');
 
     if (!dto.imageBase64) throw new BadRequestException('Base64 image is required');
 
     const exists = await this.repo.findOne({
-      where: { name: dto.name, productTypeId: dto.productTypeId, isDeleted: false },
+      where: { name: dto.name, productTypeId: dto.productTypeId },
     });
     if (exists) throw new BadRequestException('Product pose already exists for this product type');
 
@@ -38,7 +38,7 @@ export class ProductPosesService {
   }
 
   async findAll(productTypeId?: string, search?: string) {
-    const where: any = { isDeleted: false };
+    const where: any = {};
     if (productTypeId) where.productTypeId = productTypeId;
     if (search) where.name = ILike(`%${search}%`);
 
@@ -51,7 +51,7 @@ export class ProductPosesService {
 
   async findOne(id: string) {
     const pose = await this.repo.findOne({
-      where: { id, isDeleted: false },
+      where: { id },
       relations: ['productType', 'productType.category'],
     });
     if (!pose) throw new NotFoundException('Product pose not found');
@@ -63,7 +63,7 @@ export class ProductPosesService {
 
     if (dto.productTypeId) {
       const newPt = await this.productTypeRepo.findOne({
-        where: { id: dto.productTypeId, isDeleted: false },
+        where: { id: dto.productTypeId },
       });
       if (!newPt) throw new NotFoundException('New product type not found');
       pose.productType = newPt;
@@ -75,7 +75,6 @@ export class ProductPosesService {
         where: {
           name: dto.name,
           productTypeId: pose.productTypeId,
-          isDeleted: false,
         },
       });
       if (duplicate && duplicate.id !== pose.id) {
@@ -91,8 +90,24 @@ export class ProductPosesService {
   }
 
   async softDelete(id: string) {
-    const pose = await this.findOne(id);
-    pose.isDeleted = !pose.isDeleted;
-    return this.repo.save(pose);
+    // Load the pose including soft-deleted ones
+    const pose = await this.repo.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+
+    if (!pose) {
+      throw new NotFoundException('Product pose not found');
+    }
+
+    // Toggle delete/restore
+    if (pose.deletedAt) {
+      await this.repo.restore(id);
+    } else {
+      await this.repo.softDelete(id);
+    }
+
+    // Return updated entity (same behavior as before)
+    return this.repo.findOne({ where: { id } });
   }
 }

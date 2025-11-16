@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
-import { Category } from './category.entity';
+import { Category } from '../../../database/entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Industry } from '../industries/industry.entity';
+import { Industry } from '../../../database/entities/industry.entity';
 
 @Injectable()
 export class CategoriesService {
@@ -18,13 +18,13 @@ export class CategoriesService {
 
   async create(dto: CreateCategoryDto) {
     const industry = await this.industryRepo.findOne({
-      where: { id: dto.industryId, isDeleted: false },
+      where: { id: dto.industryId },
     });
     if (!industry) throw new NotFoundException('Industry not found');
 
     // Ensure category name uniqueness within the same industry
     const existing = await this.repo.findOne({
-      where: { name: dto.name, industryId: dto.industryId, isDeleted: false },
+      where: { name: dto.name, industryId: dto.industryId },
     });
     if (existing) throw new BadRequestException('Category already exists in this industry');
 
@@ -33,7 +33,7 @@ export class CategoriesService {
   }
 
   async findAll(industryId?: string, search?: string) {
-    const where: any = { isDeleted: false };
+    const where: any = {};
 
     if (industryId) where.industryId = industryId;
     if (search) where.name = ILike(`%${search}%`);
@@ -47,7 +47,7 @@ export class CategoriesService {
 
   async findOne(id: string) {
     const category = await this.repo.findOne({
-      where: { id, isDeleted: false },
+      where: { id },
       relations: ['industry', 'productTypes'],
     });
     if (!category) throw new NotFoundException('Category not found');
@@ -59,7 +59,7 @@ export class CategoriesService {
 
     if (dto.industryId) {
       const newIndustry = await this.industryRepo.findOne({
-        where: { id: dto.industryId, isDeleted: false },
+        where: { id: dto.industryId },
       });
       if (!newIndustry) throw new NotFoundException('New Industry not found');
       category.industry = newIndustry;
@@ -70,8 +70,21 @@ export class CategoriesService {
   }
 
   async softDelete(id: string) {
-    const category = await this.findOne(id);
-    category.isDeleted = !category.isDeleted;
-    return this.repo.save(category);
+    const entity = await this.repo.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+
+    if (!entity) {
+      throw new NotFoundException('Entity not found');
+    }
+
+    if (entity.deletedAt) {
+      await this.repo.restore(id);
+    } else {
+      await this.repo.softDelete(id);
+    }
+
+    return this.repo.findOne({ where: { id } });
   }
 }

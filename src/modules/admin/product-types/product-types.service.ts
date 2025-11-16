@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
-import { ProductType } from './product-type.entity';
+import { ProductType } from '../../../database/entities/product-type.entity';
 import { CreateProductTypeDto } from './dto/create-product-type.dto';
 import { UpdateProductTypeDto } from './dto/update-product-type.dto';
-import { Category } from '../categories/category.entity';
+import { Category } from '../../../database/entities/category.entity';
 
 @Injectable()
 export class ProductTypesService {
@@ -18,13 +18,13 @@ export class ProductTypesService {
 
   async create(dto: CreateProductTypeDto) {
     const category = await this.categoryRepo.findOne({
-      where: { id: dto.categoryId, isDeleted: false },
+      where: { id: dto.categoryId },
       relations: ['industry'],
     });
     if (!category) throw new NotFoundException('Category not found');
 
     const exists = await this.repo.findOne({
-      where: { name: dto.name, categoryId: dto.categoryId, isDeleted: false },
+      where: { name: dto.name, categoryId: dto.categoryId },
     });
     if (exists) throw new BadRequestException('Product type already exists for this category');
 
@@ -33,7 +33,7 @@ export class ProductTypesService {
   }
 
   async findAll(categoryId?: string, search?: string) {
-    const where: any = { isDeleted: false };
+    const where: any = {};
     if (categoryId) where.categoryId = categoryId;
     if (search) where.name = ILike(`%${search}%`);
 
@@ -46,7 +46,7 @@ export class ProductTypesService {
 
   async findOne(id: string) {
     const pt = await this.repo.findOne({
-      where: { id, isDeleted: false },
+      where: { id },
       relations: ['category', 'category.industry'],
     });
     if (!pt) throw new NotFoundException('Product type not found');
@@ -58,7 +58,7 @@ export class ProductTypesService {
 
     if (dto.categoryId) {
       const newCategory = await this.categoryRepo.findOne({
-        where: { id: dto.categoryId, isDeleted: false },
+        where: { id: dto.categoryId },
       });
       if (!newCategory) throw new NotFoundException('New category not found');
       productType.category = newCategory;
@@ -69,8 +69,24 @@ export class ProductTypesService {
   }
 
   async softDelete(id: string) {
-    const pt = await this.findOne(id);
-    pt.isDeleted = !pt.isDeleted;
-    return this.repo.save(pt);
+    // Fetch including soft-deleted product types
+    const pt = await this.repo.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+
+    if (!pt) {
+      throw new NotFoundException('Product type not found');
+    }
+
+    // Toggle soft delete / restore
+    if (pt.deletedAt) {
+      await this.repo.restore(id);
+    } else {
+      await this.repo.softDelete(id);
+    }
+
+    // Return updated product type just like before
+    return this.repo.findOne({ where: { id } });
   }
 }

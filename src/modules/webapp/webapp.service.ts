@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Industry } from '../admin/industries/industry.entity';
-import { Category } from '../admin/categories/category.entity';
-import { ProductType } from '../admin/product-types/product-type.entity';
-import { ProductTheme } from '../admin/product-themes/product-theme.entity';
-import { ProductBackground } from '../admin/product-backgrounds/product-background.entity';
+import { Industry } from '../../database/entities/industry.entity';
+import { Category } from '../../database/entities/category.entity';
+import { ProductType } from '../../database/entities/product-type.entity';
+import { ProductTheme } from '../../database/entities/product-theme.entity';
+import { ProductBackground } from '../../database/entities/product-background.entity';
 
 @Injectable()
 export class WebAppService {
@@ -32,7 +32,6 @@ export class WebAppService {
    */
   async getIndustriesTree() {
     const industries = await this.industryRepo.find({
-      where: { isDeleted: false },
       relations: [
         'categories',
         'categories.productTypes',
@@ -50,35 +49,27 @@ export class WebAppService {
       id: industry.id,
       name: industry.name,
       description: industry.description,
-      categories: industry.categories
-        ?.filter(cat => !cat.isDeleted)
-        .map(cat => ({
-          id: cat.id,
-          name: cat.name,
-          description: cat.description,
-          productTypes: cat.productTypes
-            ?.filter(pt => !pt.isDeleted)
-            .map(pt => ({
-              id: pt.id,
-              name: pt.name,
-              description: pt.description,
-              productThemes: pt.productThemes
-                ?.filter(theme => !theme.isDeleted)
-                .map(theme => ({
-                  id: theme.id,
-                  name: theme.name,
-                  description: theme.description,
-                  productBackgrounds: theme.productBackgrounds
-                    ?.filter(pb => !pb.isDeleted)
-                    .map(pb => ({
-                      id: pb.id,
-                      name: pb.name,
-                      description: pb.description,
-                      imageBase64: pb.imageBase64,
-                    })),
-                })),
+      categories: industry.categories?.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        description: cat.description,
+        productTypes: cat.productTypes?.map(pt => ({
+          id: pt.id,
+          name: pt.name,
+          description: pt.description,
+          productThemes: pt.productThemes?.map(theme => ({
+            id: theme.id,
+            name: theme.name,
+            description: theme.description,
+            productBackgrounds: theme.productBackgrounds?.map(pb => ({
+              id: pb.id,
+              name: pb.name,
+              description: pb.description,
+              imageBase64: pb.imageBase64,
             })),
+          })),
         })),
+      })),
     }));
   }
 }

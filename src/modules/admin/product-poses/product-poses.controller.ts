@@ -18,7 +18,7 @@ export class ProductPosesController {
   @ApiQuery({ name: 'search', required: false, type: String })
   async findAll(@Query('productTypeId') productTypeId?: string, @Query('search') search?: string) {
     const result = await this.service.findAll(productTypeId, search);
-    return ResponseUtil.success(result, 'Product pose created successfully');
+    return ResponseUtil.success(result, 'Product pose retrieved successfully');
   }
 
   @Get(':id')
