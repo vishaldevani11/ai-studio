@@ -29,6 +29,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { RateLimit } from '../../security/decorators/rate-limit.decorator';
 import { User } from '../../database/entities/user.entity';
 import { ResponseUtil } from '../../common/utils/response.util';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 
 @ApiTags('Authentication')
 @Controller(ROUTES.AUTH.BASE)
@@ -121,30 +122,25 @@ export class AuthController {
     return ResponseUtil.success(null, 'Password has been successfully reset');
   }
 
-  // -----------------------------------------------------
-  // GET PROFILE
-  // -----------------------------------------------------
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtAuthGuard)
   @Get(ROUTES.AUTH.PROFILE)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, type: ProfileDto })
-  async getProfile(@CurrentUser() user: User) {
-    const userProfile = await this.authService.getProfile(user.id);
-    return ResponseUtil.success(userProfile, 'Profile retrieved successfully');
+  async getProfile(@CurrentUser() user: any) {
+    const profile = await this.authService.getProfile(user.id);
+    return ResponseUtil.success(profile, 'Profile retrieved successfully');
   }
 
   // -----------------------------------------------------
   // UPDATE PROFILE
   // -----------------------------------------------------
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtAuthGuard)
   @Patch(ROUTES.AUTH.PROFILE)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update user profile' })
   @ApiBody({ type: UpdateProfileDto })
   @ApiResponse({ status: 200, type: ProfileDto })
-  async updateProfile(@CurrentUser() user: User, @Body() dto: UpdateProfileDto) {
+  async updateProfile(@CurrentUser() user: any, @Body() dto: UpdateProfileDto) {
     const updatedUser = await this.authService.updateProfile(user.id, dto);
     return ResponseUtil.success(updatedUser, 'Profile updated successfully');
   }

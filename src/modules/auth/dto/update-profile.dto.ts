@@ -38,13 +38,4 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsUrl({}, { message: 'Please provide a valid profile image URL' })
   profileImage?: string;
-
-  @ApiPropertyOptional({
-    description: 'Referral code (optional)',
-    example: 'REF123456',
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  referralCode?: string;
 }

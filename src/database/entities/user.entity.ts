@@ -59,10 +59,6 @@ export class User extends BaseEntity {
 
   @Column({ name: 'last_login', type: 'timestamp with time zone', nullable: true })
   lastLogin?: Date;
-
-  @Column({ name: 'referral_code', length: 50, nullable: true })
-  referralCode?: string;
-
   // Stored hashed — for security
   @Column({ type: 'varchar', length: 255, nullable: true, select: false })
   refreshToken?: string;

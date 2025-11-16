@@ -27,6 +27,7 @@ import {
   DEFAULT_ADDRESS_COUNTRY,
   PASSWORD_RESET_TOKEN_BYTES,
 } from '../../common/constants/auth.constants';
+import { ProfileDto } from './dto/profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -116,9 +117,36 @@ export class AuthService {
       const tokens = await this.generateTokens(saved);
       await this.updateRefreshToken(saved.id, tokens.refreshToken);
 
+      // --------------------------------------------------
+      // 🔥 SAFE MAPPING: User Entity → ProfileDto
+      // --------------------------------------------------
+      const profile = new ProfileDto({
+        id: saved.id,
+        email: saved.email,
+        firstName: saved.firstName,
+        lastName: saved.lastName,
+        phone: saved.phone,
+        role: saved.role,
+        status: saved.status,
+        profileImage: saved.profileImage,
+        createdAt: saved.createdAt,
+        updatedAt: saved.updatedAt,
+        business: business
+          ? {
+              businessName: business.businessName,
+              businessType: business.businessType,
+              businessSegment: business.businessSegment,
+              businessDescription: business.businessDescription,
+              gstNumber: business.gstNumber,
+              websiteUrl: business.websiteUrl,
+              businessLogo: business.businessLogo,
+            }
+          : undefined,
+      });
+
       return {
         ...tokens,
-        user: saved,
+        user: profile,
       };
     } catch (err) {
       await query.rollbackTransaction();
@@ -128,30 +156,71 @@ export class AuthService {
     }
   }
 
-  // ========================================================
-  // LOGIN
-  // ========================================================
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const { email, password } = dto;
 
-    const user = await this.userRepo.findOne({ where: { email } });
-    if (!user) throw new UnauthorizedException('Invalid email or password');
+    // 1. Find user + business relation
+    const user = await this.userRepo.findOne({
+      where: { email },
+      relations: ['business'],
+    });
 
+    if (!user) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    // 2. Compare passwords
     const match = await bcrypt.compare(password, user.passwordHash);
-    if (!match) throw new UnauthorizedException('Invalid email or password');
+    if (!match) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
 
-    if (user.status !== UserStatus.ACTIVE)
+    // 3. Check user status
+    if (user.status !== UserStatus.ACTIVE) {
       throw new UnauthorizedException('Account inactive or banned');
+    }
 
-    await this.userRepo.update(user.id, { lastLogin: new Date() });
-    user.lastLogin = new Date();
+    // 4. Update last login
+    const now = new Date();
+    await this.userRepo.update(user.id, { lastLogin: now });
+    user.lastLogin = now;
 
+    // 5. Generate tokens
     const tokens = await this.generateTokens(user);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
+    // 6. Map business entity → DTO
+    const businessDto = user.business
+      ? {
+          businessName: user.business.businessName,
+          businessType: user.business.businessType,
+          businessSegment: user.business.businessSegment,
+          businessDescription: user.business.businessDescription,
+          gstNumber: user.business.gstNumber,
+          websiteUrl: user.business.websiteUrl,
+          businessLogo: user.business.businessLogo,
+        }
+      : undefined;
+
+    // 7. Map User → ProfileDto (safe mapping)
+    const profile = new ProfileDto({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      role: user.role,
+      status: user.status,
+      profileImage: user.profileImage,
+      business: businessDto,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    });
+
+    // 8. Final response
     return {
       ...tokens,
-      user,
+      user: profile,
     };
   }
 
@@ -185,13 +254,44 @@ export class AuthService {
   // ========================================================
   // GET PROFILE
   // ========================================================
-  async getProfile(userId: string) {
+  async getProfile(userId: string): Promise<ProfileDto> {
     const user = await this.userRepo.findOne({
       where: { id: userId },
       relations: ['addresses', 'business'],
     });
-    if (!user) throw new NotFoundException('User not found');
-    return user;
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const businessDto = user.business
+      ? {
+          businessName: user.business.businessName,
+          businessType: user.business.businessType,
+          businessSegment: user.business.businessSegment,
+          businessDescription: user.business.businessDescription,
+          gstNumber: user.business.gstNumber,
+          websiteUrl: user.business.websiteUrl,
+          businessLogo: user.business.businessLogo,
+        }
+      : undefined;
+
+    return new ProfileDto({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      emailVerified: user.emailVerified,
+      phoneVerified: user.phoneVerified,
+      role: user.role,
+      status: user.status,
+      profileImage: user.profileImage,
+      addresses: user.addresses,
+      business: businessDto,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    });
   }
 
   // ========================================================

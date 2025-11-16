@@ -3,7 +3,6 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
-import { User } from '../../../database/entities/user.entity';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -18,11 +17,24 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: any): Promise<User> {
+  async validate(payload: any): Promise<any> {
     const user = await this.authService.validateUserById(payload.sub);
+
     if (!user) {
       throw new UnauthorizedException('Invalid or expired token');
     }
-    return user;
+
+    // ⛔ DO NOT RETURN entity instance (Passport rejects it)
+    // return user;
+
+    // ✅ Return plain safe object instead
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      emailVerified: user.emailVerified,
+      phoneVerified: user.phoneVerified,
+    };
   }
 }

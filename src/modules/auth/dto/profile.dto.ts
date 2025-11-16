@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BusinessDto } from './business.dto';
+import { AddressDto } from './address.dto';
 import { UserRole, UserStatus } from '../../../database/entities/user.entity';
 
 export class ProfileDto {
@@ -21,10 +22,11 @@ export class ProfileDto {
   })
   phone?: string;
 
-  @ApiPropertyOptional({
-    description: 'User profile image URL (optional)',
-  })
-  profileImage?: string;
+  @ApiProperty({ description: "Whether the user's email is verified" })
+  emailVerified: boolean;
+
+  @ApiProperty({ description: "Whether the user's phone is verified" })
+  phoneVerified: boolean;
 
   @ApiProperty({
     description: 'User role',
@@ -39,20 +41,31 @@ export class ProfileDto {
   status: UserStatus;
 
   @ApiPropertyOptional({
+    description: 'User profile image URL (optional)',
+  })
+  profileImage?: string;
+
+  @ApiPropertyOptional({
+    description: 'User addresses',
+    type: [AddressDto],
+  })
+  addresses?: AddressDto[];
+
+  @ApiPropertyOptional({
     description: 'Business details associated with the user',
     type: BusinessDto,
   })
   business?: BusinessDto;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Date and time user was created',
   })
-  createdAt?: Date;
+  createdAt: Date;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Date and time user was last updated',
   })
-  updatedAt?: Date;
+  updatedAt: Date;
 
   constructor(partial: Partial<ProfileDto>) {
     Object.assign(this, partial);
