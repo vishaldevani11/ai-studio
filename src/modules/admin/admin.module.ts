@@ -18,6 +18,8 @@ import { ProductThemesService } from './product-themes/product-themes.service';
 import { ProductBackground } from '../../database/entities/product-background.entity';
 import { ProductBackgroundsController } from './product-backgrounds/product-backgrounds.controller';
 import { ProductBackgroundsService } from './product-backgrounds/product-backgrounds.service';
+import { AdminUsersModule } from './admin-users/admin-users.module';
+import { AdminRegularUsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { ProductBackgroundsService } from './product-backgrounds/product-backgro
       ProductTheme,
       ProductBackground,
     ]),
+    AdminUsersModule,
+    AdminRegularUsersModule,
   ],
   controllers: [
     IndustriesController,

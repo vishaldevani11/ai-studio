@@ -29,4 +29,33 @@ export class ResponseUtil {
       requestId,
     };
   }
+
+  static paginated<T>(
+    data: T[],
+    page: number,
+    limit: number,
+    total: number,
+    message?: string,
+    requestId?: string,
+  ): ApiResponse<{
+    items: T[];
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+  }> {
+    return {
+      success: true,
+      data: {
+        items: data,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      },
+      error: false,
+      message,
+      timestamp: new Date().toISOString(),
+      requestId,
+    };
+  }
 }

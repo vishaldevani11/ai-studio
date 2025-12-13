@@ -38,6 +38,10 @@ import {
   DEFAULT_CLOUDINARY_API_KEY,
   DEFAULT_CLOUDINARY_API_SECRET,
   DEFAULT_BASE_URL,
+  DEFAULT_WHATSAPP_PROVIDER,
+  DEFAULT_WHATSAPP_API_URL,
+  DEFAULT_WHATSAPP_OTP_SIGNUP_TEMPLATE,
+  DEFAULT_WHATSAPP_OTP_RESET_TEMPLATE,
 } from 'src/common/constants/config.constants';
 
 export default registerAs('app', () => ({
@@ -106,4 +110,23 @@ export default registerAs('app', () => ({
     },
   },
   baseUrl: process.env.BASE_URL || DEFAULT_BASE_URL,
+  whatsapp: {
+    provider: process.env.WHATSAPP_PROVIDER || DEFAULT_WHATSAPP_PROVIDER,
+    apiUrl: process.env.WHATSAPP_API_URL || DEFAULT_WHATSAPP_API_URL,
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN,
+    phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID,
+    businessAccountId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+    appId: process.env.WHATSAPP_APP_ID,
+    appSecret: process.env.WHATSAPP_APP_SECRET,
+    // BSP Credentials (MSG91/Gupshup)
+    msg91ApiKey: process.env.MSG91_API_KEY,
+    msg91SenderId: process.env.MSG91_SENDER_ID,
+    gupshupApiKey: process.env.GUPSHUP_API_KEY,
+    gupshupAppName: process.env.GUPSHUP_APP_NAME,
+    // Template Names
+    otpSignupTemplate:
+      process.env.WHATSAPP_OTP_SIGNUP_TEMPLATE || DEFAULT_WHATSAPP_OTP_SIGNUP_TEMPLATE,
+    otpResetTemplate:
+      process.env.WHATSAPP_OTP_RESET_TEMPLATE || DEFAULT_WHATSAPP_OTP_RESET_TEMPLATE,
+  },
 }));

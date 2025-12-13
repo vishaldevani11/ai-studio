@@ -47,7 +47,7 @@ export class UsersService {
       where: { id: currentUserId },
     });
 
-    if (currentUser.role !== 'admin' && currentUser.id !== id) {
+    if (!['admin', 'super_admin'].includes(currentUser.role) && currentUser.id !== id) {
       throw new UnauthorizedException('You can only update your own profile');
     }
 
@@ -63,7 +63,7 @@ export class UsersService {
     const updatedUser = await this.userRepository.save(user);
 
     // Return user without sensitive data
-    const { _passwordHash, _refreshToken, _refreshTokenExpires, ...userWithoutSensitiveData } =
+    const { passwordHash, refreshToken, refreshTokenExpires, ...userWithoutSensitiveData } =
       updatedUser;
     return userWithoutSensitiveData as User;
   }
@@ -78,7 +78,7 @@ export class UsersService {
       where: { id: currentUserId },
     });
 
-    if (currentUser.role !== 'admin' && currentUser.id !== id) {
+    if (!['admin', 'super_admin'].includes(currentUser.role) && currentUser.id !== id) {
       throw new UnauthorizedException('You can only change your own password');
     }
 
@@ -115,7 +115,7 @@ export class UsersService {
       where: { id: currentUserId },
     });
 
-    if (currentUser.role !== 'admin') {
+    if (!['admin', 'super_admin'].includes(currentUser.role)) {
       throw new UnauthorizedException('Only admins can delete users');
     }
 
@@ -137,7 +137,7 @@ export class UsersService {
       where: { id: currentUserId },
     });
 
-    if (currentUser.role !== 'admin') {
+    if (!['admin', 'super_admin'].includes(currentUser.role)) {
       throw new UnauthorizedException('Only admins can toggle user status');
     }
 
@@ -153,7 +153,7 @@ export class UsersService {
     const updatedUser = await this.userRepository.save(user);
 
     // Return user without sensitive data
-    const { _passwordHash, _refreshToken, _refreshTokenExpires, ...userWithoutSensitiveData } =
+    const { passwordHash, refreshToken, refreshTokenExpires, ...userWithoutSensitiveData } =
       updatedUser;
     return userWithoutSensitiveData as User;
   }

@@ -10,15 +10,23 @@ import {
   Patch,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductBackgroundsService } from './product-backgrounds.service';
 import { CreateProductBackgroundDto } from './dto/create-product-background.dto';
 import { UpdateProductBackgroundDto } from './dto/update-product-background.dto';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ResponseUtil } from '@/common/utils/response.util';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { UserRole } from '../../../database/entities/user.entity';
 
 @ApiTags('Admin - Product Backgrounds')
 @Controller(ROUTES.ADMIN.PRODUCT_BACKGROUNDS)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+@ApiBearerAuth()
 export class ProductBackgroundsController {
   constructor(private readonly service: ProductBackgroundsService) {}
 

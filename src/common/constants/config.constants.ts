@@ -49,3 +49,9 @@ export const DEFAULT_CLOUDINARY_API_KEY = 'your-api-key';
 export const DEFAULT_CLOUDINARY_API_SECRET = 'your-api-secret';
 
 export const DEFAULT_BASE_URL = 'http://localhost:3000';
+
+// WhatsApp Business API Defaults
+export const DEFAULT_WHATSAPP_PROVIDER = 'meta-direct';
+export const DEFAULT_WHATSAPP_API_URL = 'https://graph.facebook.com/v18.0';
+export const DEFAULT_WHATSAPP_OTP_SIGNUP_TEMPLATE = 'otp_signup';
+export const DEFAULT_WHATSAPP_OTP_RESET_TEMPLATE = 'otp_reset_password';

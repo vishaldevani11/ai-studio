@@ -2,16 +2,26 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, BadRequestException } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { DataSource } from 'typeorm';
 import helmet from 'helmet';
 import * as compression from 'compression';
 import * as bodyParser from 'body-parser';
 import { AppModule } from './app.module';
 import { ValidationErrorUtil } from './common/utils/validation-error.util';
 import { API_PREFIX, API_VERSION, ROUTES } from './common/constants';
+import { createSuperAdmin } from './database/seeds/create-super-admin.seed';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  // Create super admin on startup
+  try {
+    const dataSource = app.get(DataSource);
+    await createSuperAdmin(dataSource);
+  } catch (error) {
+    console.error('⚠️  Failed to create super admin:', error.message);
+  }
 
   // Increase body limit for Base64 images
   app.use(bodyParser.json({ limit: '20mb' }));
@@ -42,6 +52,10 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true,
       },
+      // Skip validation for undefined/null values and custom decorators
+      skipMissingProperties: false,
+      skipNullProperties: false,
+      skipUndefinedProperties: false,
       exceptionFactory: errors => {
         const formattedErrors = ValidationErrorUtil.format(errors);
 
@@ -62,17 +76,31 @@ async function bootstrap() {
     .setTitle('SaaS Backend API')
     .setDescription('Production-ready SaaS backend boilerplate with NestJS')
     .setVersion(API_VERSION)
+
+    // Access Token (Bearer)
     .addBearerAuth(
       {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
         name: 'JWT',
-        description: 'Enter JWT token',
+        description: 'Enter Access Token: Bearer <token>',
         in: 'header',
       },
       'bearer',
     )
+
+    // Refresh Token (Custom Header)
+    .addApiKey(
+      {
+        type: 'apiKey',
+        in: 'header',
+        name: 'Authorization',
+        description: 'Enter Refresh Token: Refresh <token>',
+      },
+      'refresh-token',
+    )
+
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

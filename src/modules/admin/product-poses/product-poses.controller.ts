@@ -1,13 +1,20 @@
 import { ROUTES } from '../../../common/constants';
-import { Controller, Get, Post, Body, Param, Query, Put, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Put, Patch, UseGuards } from '@nestjs/common';
 import { ProductPosesService } from './product-poses.service';
 import { CreateProductPoseDto } from './dto/create-product-pose.dto';
 import { UpdateProductPoseDto } from './dto/update-product-pose.dto';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ResponseUtil } from '@/common/utils/response.util';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { UserRole } from '../../../database/entities/user.entity';
 
 @ApiTags('Admin - Product Poses')
 @Controller(ROUTES.ADMIN.PRODUCT_POSES)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+@ApiBearerAuth()
 export class ProductPosesController {
   constructor(private readonly service: ProductPosesService) {}
 

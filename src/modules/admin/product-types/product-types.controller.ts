@@ -1,13 +1,20 @@
 import { ROUTES } from '../../../common/constants';
-import { Controller, Get, Post, Body, Param, Query, Put, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Put, Patch, UseGuards } from '@nestjs/common';
 import { ProductTypesService } from './product-types.service';
 import { CreateProductTypeDto } from './dto/create-product-type.dto';
 import { UpdateProductTypeDto } from './dto/update-product-type.dto';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ResponseUtil } from '@/common/utils/response.util';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { UserRole } from '../../../database/entities/user.entity';
 
 @ApiTags('Admin - Product Types')
 @Controller(ROUTES.ADMIN.PRODUCT_TYPES)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+@ApiBearerAuth()
 export class ProductTypesController {
   constructor(private readonly service: ProductTypesService) {}
 

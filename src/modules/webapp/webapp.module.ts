@@ -7,10 +7,12 @@ import { Category } from '../../database/entities/category.entity';
 import { ProductType } from '../../database/entities/product-type.entity';
 import { ProductBackground } from '../../database/entities/product-background.entity';
 import { ProductTheme } from '../../database/entities/product-theme.entity';
+import { WebAppProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Industry, Category, ProductType, ProductTheme, ProductBackground]),
+    WebAppProfileModule,
   ],
   controllers: [WebAppController],
   providers: [WebAppService],

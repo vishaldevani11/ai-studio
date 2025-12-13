@@ -13,7 +13,7 @@ export class ProductThemesService {
     private readonly repo: Repository<ProductTheme>,
     @InjectRepository(ProductType)
     private readonly productTypeRepo: Repository<ProductType>,
-  ) { }
+  ) {}
 
   async create(dto: CreateProductThemeDto) {
     const productTypes = dto.productTypeIds

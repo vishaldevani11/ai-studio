@@ -61,4 +61,25 @@ export const validationSchema = Joi.object({
   // Stripe
   STRIPE_SECRET_KEY: Joi.string().required(),
   STRIPE_WEBHOOK_SECRET: Joi.string().required(),
+
+  // WhatsApp Business API - Optional
+  WHATSAPP_PROVIDER: Joi.string().valid('meta-direct', 'msg91', 'gupshup').optional(),
+  WHATSAPP_API_URL: Joi.string().uri().optional(),
+  WHATSAPP_ACCESS_TOKEN: Joi.string().optional(),
+  WHATSAPP_PHONE_NUMBER_ID: Joi.string().optional(),
+  WHATSAPP_BUSINESS_ACCOUNT_ID: Joi.string().optional(),
+  WHATSAPP_APP_ID: Joi.string().optional(),
+  WHATSAPP_APP_SECRET: Joi.string().optional(),
+  // BSP Credentials
+  MSG91_API_KEY: Joi.string().optional(),
+  MSG91_SENDER_ID: Joi.string().optional(),
+  GUPSHUP_API_KEY: Joi.string().optional(),
+  GUPSHUP_APP_NAME: Joi.string().optional(),
+  // Templates
+  WHATSAPP_OTP_SIGNUP_TEMPLATE: Joi.string().optional(),
+  WHATSAPP_OTP_RESET_TEMPLATE: Joi.string().optional(),
+
+  // Super Admin (Optional - only needed for initial setup)
+  SUPER_ADMIN_EMAIL: Joi.string().email().optional(),
+  SUPER_ADMIN_PASSWORD: Joi.string().min(8).optional(),
 });

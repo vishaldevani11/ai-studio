@@ -11,43 +11,84 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiSecurity,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 
-import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
-import { ProfileDto } from './dto/profile.dto';
+import { SendOtpDto } from './dto/send-otp.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { CompleteRegistrationDto } from './dto/complete-registration.dto';
+import { VerifyResetOtpDto } from './dto/verify-reset-otp.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
+import { OtpPurpose } from '../../common/constants/auth.constants';
 
 import { JwtRefreshGuard } from '../../common/guards/jwt-refresh.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { RateLimit } from '../../security/decorators/rate-limit.decorator';
-import { User } from '../../database/entities/user.entity';
 import { ResponseUtil } from '../../common/utils/response.util';
-import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 
-@ApiTags('Authentication')
-@Controller(ROUTES.AUTH.BASE)
+@ApiTags('WebApp - Authentication')
+@Controller(ROUTES.WEBAPP.BASE)
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   // -----------------------------------------------------
-  // REGISTER
+  // OTP-BASED SIGNUP FLOW
   // -----------------------------------------------------
   @Public()
-  @Post(ROUTES.AUTH.REGISTER)
+  @Post('signup/send-otp')
+  @RateLimit({ limit: 5, window: 60 * 15 })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Send OTP for signup' })
+  @ApiBody({ type: SendOtpDto })
+  @ApiResponse({ status: 200, description: 'OTP sent successfully' })
+  @ApiResponse({ status: 409, description: 'User with this phone number already exists' })
+  async sendSignupOtp(@Body() dto: SendOtpDto) {
+    await this.authService.sendSignupOtp(dto.phone);
+    return ResponseUtil.success(null, 'OTP sent successfully to your WhatsApp');
+  }
+
+  @Public()
+  @Post('signup/verify-otp')
   @RateLimit({ limit: 10, window: 60 * 15 })
-  @ApiOperation({ summary: 'Register a new user' })
-  @ApiBody({ type: RegisterDto })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify OTP for signup' })
+  @ApiBody({ type: VerifyOtpDto })
+  @ApiResponse({ status: 200, description: 'OTP verified successfully' })
+  async verifySignupOtp(@Body() dto: VerifyOtpDto) {
+    const result = await this.authService.verifySignupOtp(dto.phone, dto.otp);
+
+    if (result.userExists) {
+      return ResponseUtil.error(null, 'User already registered with this phone number');
+    }
+
+    return ResponseUtil.success(
+      { sessionToken: result.sessionToken },
+      'OTP verified successfully. Please complete your registration.',
+    );
+  }
+
+  @Public()
+  @Post('signup/complete')
+  @RateLimit({ limit: 5, window: 60 * 15 })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Complete registration after OTP verification' })
+  @ApiBody({ type: CompleteRegistrationDto })
   @ApiResponse({ status: 201, description: 'User successfully registered', type: AuthResponseDto })
-  async register(@Body() registerDto: RegisterDto) {
-    const result = await this.authService.register(registerDto);
+  async completeRegistration(@Body() dto: CompleteRegistrationDto) {
+    const { sessionToken, ...registrationData } = dto;
+    const result = await this.authService.completeRegistration(sessionToken, registrationData);
     return ResponseUtil.success(result, 'User registered successfully');
   }
 
@@ -55,7 +96,7 @@ export class AuthController {
   // LOGIN
   // -----------------------------------------------------
   @Public()
-  @Post(ROUTES.AUTH.LOGIN)
+  @Post('login')
   @RateLimit({ limit: 10, window: 60 * 15 })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login user' })
@@ -71,91 +112,94 @@ export class AuthController {
   // -----------------------------------------------------
   @Public()
   @UseGuards(JwtRefreshGuard)
-  @Post(ROUTES.AUTH.REFRESH)
+  @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @ApiSecurity('refresh-token') // ✔️ Correct for custom header
   @ApiOperation({ summary: 'Refresh access token' })
-  @ApiResponse({ status: 200, description: 'Token refreshed successfully', type: AuthResponseDto })
-  async refresh(@CurrentUser() user: User) {
-    const result = await this.authService.refreshToken(user.id, user.refreshToken);
+  @ApiResponse({ status: 200, type: AuthResponseDto })
+  async refresh(@CurrentUser() user: any) {
+    const result = await this.authService.refreshToken(user.id, user.token);
     return ResponseUtil.success(result, 'Token refreshed successfully');
   }
 
   // -----------------------------------------------------
   // LOGOUT
   // -----------------------------------------------------
-  @Public()
   @UseGuards(JwtRefreshGuard)
-  @Post(ROUTES.AUTH.LOGOUT)
+  @Post('logout')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('refresh-token')
   @ApiOperation({ summary: 'Logout user' })
-  async logout(@CurrentUser() user: User) {
+  @ApiResponse({ status: 200, description: 'User logged out successfully' })
+  async logout(@CurrentUser() user: any) {
     await this.authService.logout(user.id);
     return ResponseUtil.success(null, 'User logged out successfully');
   }
 
   // -----------------------------------------------------
-  // FORGOT PASSWORD
+  // OTP-BASED FORGOT PASSWORD FLOW
   // -----------------------------------------------------
   @Public()
-  @Post('forgot-password')
+  @Post('forgot-password/send-otp')
   @RateLimit({ limit: 5, window: 60 * 10 })
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Request a password reset' })
-  @ApiBody({ type: ForgotPasswordDto })
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    await this.authService.forgotPassword(forgotPasswordDto.email);
-    return ResponseUtil.success(null, 'Password reset instructions sent if the email is valid');
+  @ApiOperation({ summary: 'Send OTP for password reset' })
+  @ApiBody({ type: SendOtpDto })
+  @ApiResponse({ status: 200, description: 'OTP sent successfully' })
+  @ApiResponse({ status: 404, description: 'User with this phone number not found' })
+  async sendResetPasswordOtp(@Body() dto: SendOtpDto) {
+    await this.authService.sendResetPasswordOtp(dto.phone);
+    return ResponseUtil.success(null, 'OTP sent successfully to your WhatsApp');
   }
 
-  // -----------------------------------------------------
-  // RESET PASSWORD
-  // -----------------------------------------------------
+  @Public()
+  @Post('forgot-password/verify-otp')
+  @RateLimit({ limit: 10, window: 60 * 10 })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify OTP for password reset' })
+  @ApiBody({ type: VerifyResetOtpDto })
+  @ApiResponse({ status: 200, description: 'OTP verified successfully' })
+  async verifyResetPasswordOtp(@Body() dto: VerifyResetOtpDto) {
+    const sessionToken = await this.authService.verifyResetPasswordOtp(dto.phone, dto.otp);
+    return ResponseUtil.success(
+      { sessionToken },
+      'OTP verified successfully. You can now reset your password.',
+    );
+  }
+
+  @Public()
+  @Post('forgot-password/resend-otp')
+  @RateLimit({ limit: 3, window: 60 * 10 })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resend OTP for signup or password reset' })
+  @ApiBody({ type: ResendOtpDto })
+  @ApiResponse({ status: 200, description: 'OTP resent successfully' })
+  @ApiResponse({
+    status: 404,
+    description: 'User with this phone number not found (for password reset)',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'User with this phone number already exists (for signup)',
+  })
+  async resendOtp(@Body() dto: ResendOtpDto) {
+    if (dto.purpose === OtpPurpose.SIGNUP) {
+      await this.authService.sendSignupOtp(dto.phone);
+    } else {
+      await this.authService.sendResetPasswordOtp(dto.phone);
+    }
+    return ResponseUtil.success(null, 'OTP resent successfully');
+  }
+
   @Public()
   @Post('reset-password')
   @RateLimit({ limit: 5, window: 60 * 10 })
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Reset password' })
+  @ApiOperation({ summary: 'Reset password after OTP verification' })
   @ApiBody({ type: ResetPasswordDto })
+  @ApiResponse({ status: 200, description: 'Password reset successfully' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
-    await this.authService.resetPassword(dto.resetToken, dto.newPassword);
+    await this.authService.resetPasswordWithOtp(dto.phone, dto.newPassword, dto.confirmPassword);
     return ResponseUtil.success(null, 'Password has been successfully reset');
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get(ROUTES.AUTH.PROFILE)
-  @ApiBearerAuth()
-  async getProfile(@CurrentUser() user: any) {
-    const profile = await this.authService.getProfile(user.id);
-    return ResponseUtil.success(profile, 'Profile retrieved successfully');
-  }
-
-  // -----------------------------------------------------
-  // UPDATE PROFILE
-  // -----------------------------------------------------
-  @UseGuards(JwtAuthGuard)
-  @Patch(ROUTES.AUTH.PROFILE)
-  @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update user profile' })
-  @ApiBody({ type: UpdateProfileDto })
-  @ApiResponse({ status: 200, type: ProfileDto })
-  async updateProfile(@CurrentUser() user: any, @Body() dto: UpdateProfileDto) {
-    const updatedUser = await this.authService.updateProfile(user.id, dto);
-    return ResponseUtil.success(updatedUser, 'Profile updated successfully');
-  }
-
-  // -----------------------------------------------------
-  // CHANGE PASSWORD
-  // -----------------------------------------------------
-  @UseGuards(JwtRefreshGuard)
-  @Patch('change-password')
-  @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Change password' })
-  @ApiBody({ type: ChangePasswordDto })
-  async changePassword(@CurrentUser() user: User, @Body() dto: ChangePasswordDto) {
-    await this.authService.changePassword(user.id, dto.oldPassword, dto.newPassword);
-    return ResponseUtil.success(null, 'Password changed successfully');
   }
 }

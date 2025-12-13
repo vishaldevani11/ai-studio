@@ -1,13 +1,20 @@
 import { ROUTES } from '../../../common/constants';
-import { Controller, Get, Post, Body, Param, Put, Patch, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Patch, Query, UseGuards } from '@nestjs/common';
 import { ProductThemesService } from './product-themes.service';
 import { CreateProductThemeDto } from './dto/create-product-theme.dto';
 import { UpdateProductThemeDto } from './dto/update-product-theme.dto';
-import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { ResponseUtil } from '@/common/utils/response.util';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { UserRole } from '../../../database/entities/user.entity';
 
 @ApiTags('Admin - Product Themes')
 @Controller(ROUTES.ADMIN.PRODUCT_THEMES)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+@ApiBearerAuth()
 export class ProductThemesController {
   constructor(private readonly service: ProductThemesService) {}
 

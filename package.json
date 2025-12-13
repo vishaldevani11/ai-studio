@@ -26,7 +26,6 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^10.0.0",
@@ -37,12 +36,15 @@
     "@nestjs/swagger": "^7.1.17",
     "@nestjs/throttler": "^5.0.1",
     "@nestjs/typeorm": "^10.0.1",
+    "axios": "^1.13.2",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "compression": "^1.7.4",
+    "dayjs": "^1.11.19",
     "eventemitter2": "^6.4.9",
     "helmet": "^7.1.0",
+    "ioredis": "^5.3.2",
     "isomorphic-dompurify": "^2.6.0",
     "joi": "^17.11.0",
     "passport": "^0.7.0",
@@ -54,7 +56,6 @@
     "typeorm": "^0.3.17",
     "uuid": "^9.0.1",
     "validator": "^13.11.0"
-    
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
@@ -63,6 +64,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/compression": "^1.7.5",
     "@types/express": "^4.17.17",
+    "@types/ioredis": "^5.0.0",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.1",
     "@types/node-fetch": "^2.6.4",

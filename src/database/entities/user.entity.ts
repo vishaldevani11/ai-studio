@@ -29,8 +29,8 @@ export class User extends BaseEntity {
   @Column({ name: 'password_hash', type: 'text' })
   passwordHash: string;
 
-  @Column({ name: 'phone', length: 20, nullable: true })
-  phone?: string;
+  @Column({ name: 'phone', length: 20, unique: true })
+  phone: string;
 
   @Column({ name: 'profile_image', type: 'text', nullable: true })
   profileImage?: string;
