@@ -11,6 +11,9 @@ export class ProductTheme extends BaseEntity {
   @Column({ nullable: true, type: 'text' })
   description?: string;
 
+  @Column({ name: 'image_url', type: 'text', nullable: true })
+  imageUrl?: string; // CDN URL from GCS
+
   @ManyToMany(() => ProductType, pt => pt.productThemes)
   @JoinTable({
     name: 'product_type_themes',

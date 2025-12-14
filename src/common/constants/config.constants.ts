@@ -48,6 +48,11 @@ export const DEFAULT_CLOUDINARY_CLOUD_NAME = 'your-cloud-name';
 export const DEFAULT_CLOUDINARY_API_KEY = 'your-api-key';
 export const DEFAULT_CLOUDINARY_API_SECRET = 'your-api-secret';
 
+export const DEFAULT_GCS_BUCKET_NAME = 'your-gcs-bucket';
+export const DEFAULT_GCS_PROJECT_ID = 'your-gcs-project-id';
+export const DEFAULT_GCS_KEY_FILENAME = './gcs-service-account.json';
+export const DEFAULT_GCS_CDN_BASE_URL = 'https://storage.googleapis.com';
+
 export const DEFAULT_BASE_URL = 'http://localhost:3000';
 
 // WhatsApp Business API Defaults

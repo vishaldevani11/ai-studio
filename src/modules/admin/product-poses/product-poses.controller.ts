@@ -1,9 +1,24 @@
 import { ROUTES } from '../../../common/constants';
-import { Controller, Get, Post, Body, Param, Query, Put, Patch, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Put,
+  Patch,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductPosesService } from './product-poses.service';
 import { CreateProductPoseDto } from './dto/create-product-pose.dto';
 import { UpdateProductPoseDto } from './dto/update-product-pose.dto';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { FileValidationPipe } from '../../../common/pipes/file-validation.pipe';
 import { ResponseUtil } from '@/common/utils/response.util';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
@@ -37,18 +52,31 @@ export class ProductPosesController {
   }
 
   @Post()
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Create a new product pose' })
   @ApiResponse({ status: 201, description: 'Product pose created successfully' })
-  async create(@Body() dto: CreateProductPoseDto) {
-    const result = await this.service.create(dto);
+  async create(
+    @Body() dto: CreateProductPoseDto,
+    @UploadedFile(new ParseFilePipe({ validators: [new FileValidationPipe()] }))
+    file: Express.Multer.File,
+  ) {
+    const result = await this.service.create(dto, file);
     return ResponseUtil.success(result, 'Product pose created successfully');
   }
 
   @Put(':id')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Update a product pose by ID' })
   @ApiResponse({ status: 200, description: 'Product pose updated successfully' })
-  async update(@Param('id') id: string, @Body() dto: UpdateProductPoseDto) {
-    const result = await this.service.update(id, dto);
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateProductPoseDto,
+    @UploadedFile(new ParseFilePipe({ validators: [new FileValidationPipe()], fileIsRequired: false }))
+    file?: Express.Multer.File,
+  ) {
+    const result = await this.service.update(id, dto, file);
     return ResponseUtil.success(result, 'Product pose updated successfully');
   }
 

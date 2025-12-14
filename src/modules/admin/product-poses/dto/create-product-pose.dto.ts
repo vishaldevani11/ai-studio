@@ -12,9 +12,13 @@ export class CreateProductPoseDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ example: 'data:image/png;base64,...', required: true })
-  @IsString()
-  imageBase64: string;
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'Image file (JPEG, PNG, WebP, GIF)',
+    required: true,
+  })
+  image: any; // File will be handled by FileInterceptor
 
   @ApiProperty({ example: 'uuid-of-product-type', description: 'Associated product type ID' })
   @IsUUID()

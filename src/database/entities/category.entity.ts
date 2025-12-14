@@ -12,6 +12,9 @@ export class Category extends BaseEntity {
   @Column({ nullable: true, type: 'text' })
   description?: string;
 
+  @Column({ name: 'image_url', type: 'text', nullable: true })
+  imageUrl?: string; // CDN URL from GCS
+
   @ManyToOne(() => Industry, industry => industry.categories, { onDelete: 'CASCADE' })
   industry: Industry;
 

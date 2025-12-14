@@ -11,8 +11,11 @@ export class ProductBackground extends BaseEntity {
   @Column({ nullable: true, type: 'text' })
   description?: string;
 
-  @Column({ name: 'image_base64', type: 'text' })
-  imageBase64: string;
+  @Column({ name: 'image_base64', type: 'text', nullable: true })
+  imageBase64?: string; // Deprecated - kept for backward compatibility
+
+  @Column({ name: 'image_url', type: 'text', nullable: true })
+  imageUrl?: string; // CDN URL from GCS
 
   @ManyToMany(() => ProductTheme, pt => pt.productBackgrounds)
   productThemes: ProductTheme[];

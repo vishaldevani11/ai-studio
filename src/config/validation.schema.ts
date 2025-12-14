@@ -82,4 +82,10 @@ export const validationSchema = Joi.object({
   // Super Admin (Optional - only needed for initial setup)
   SUPER_ADMIN_EMAIL: Joi.string().email().optional(),
   SUPER_ADMIN_PASSWORD: Joi.string().min(8).optional(),
+
+  // GCS Configuration
+  GCS_BUCKET_NAME: Joi.string().optional(),
+  GCS_PROJECT_ID: Joi.string().optional(),
+  GCS_KEY_FILENAME: Joi.string().optional(),
+  GCS_CDN_BASE_URL: Joi.string().uri().optional(),
 });

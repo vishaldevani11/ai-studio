@@ -19,6 +19,7 @@ export const ROUTES = {
     PRODUCT_TYPES: 'admin/product-types',
     USERS: 'admin/users', // Regular users management
     ADMIN_USERS: 'admin/admin-users', // Admin users management (super admin only)
+    LEGAL_DOCUMENTS: 'admin/legal-documents',
   },
   WEBAPP: {
     BASE: 'webapp',
@@ -34,6 +35,9 @@ export const ROUTES = {
     FORGOT_PASSWORD_VERIFY_OTP: 'webapp/forgot-password/verify-otp',
     FORGOT_PASSWORD_RESEND_OTP: 'webapp/forgot-password/resend-otp',
     RESET_PASSWORD: 'webapp/reset-password',
+    LEGAL_BASE: 'webapp/legal',
+    PRIVACY_POLICY: 'webapp/legal/privacy-policy',
+    TERMS_OF_SERVICE: 'webapp/legal/terms-of-service',
   },
 } as const;
 

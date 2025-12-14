@@ -17,4 +17,12 @@ export class CreateProductThemeDto {
   @IsArray()
   @IsUUID('all', { each: true })
   productTypeIds?: string[];
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'Image file (JPEG, PNG, WebP, GIF)',
+    required: false,
+  })
+  image?: any; // File will be handled by FileInterceptor
 }

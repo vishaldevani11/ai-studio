@@ -5,6 +5,8 @@ import { ProductBackground } from '../../../database/entities/product-background
 import { CreateProductBackgroundDto } from './dto/create-product-background.dto';
 import { UpdateProductBackgroundDto } from './dto/update-product-background.dto';
 import { ProductTheme } from '../../../database/entities/product-theme.entity';
+import { GcsStorageService } from '../../../storage/services/gcs-storage.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ProductBackgroundsService {
@@ -13,10 +15,11 @@ export class ProductBackgroundsService {
     private readonly repo: Repository<ProductBackground>,
     @InjectRepository(ProductTheme)
     private readonly productThemeRepo: Repository<ProductTheme>,
+    private readonly gcsStorageService: GcsStorageService,
   ) {}
 
-  async create(dto: CreateProductBackgroundDto) {
-    if (!dto.imageBase64) throw new BadRequestException('Base64 image is required');
+  async create(dto: CreateProductBackgroundDto, file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('Image file is required');
 
     const exists = await this.repo.findOne({
       where: { name: dto.name },
@@ -27,13 +30,37 @@ export class ProductBackgroundsService {
       ? await this.productThemeRepo.findByIds(dto.productThemeIds)
       : [];
 
+    // Generate unique ID for the entity (will be created on save)
+    const tempId = uuidv4();
+    const fileExtension = file.originalname.split('.').pop() || 'jpg';
+    const gcsPath = `product-backgrounds/${tempId}/${uuidv4()}.${fileExtension}`;
+
+    // Upload to GCS
+    const imageUrl = await this.gcsStorageService.uploadFile(
+      file.buffer,
+      gcsPath,
+      file.mimetype,
+    );
+
     const entity = this.repo.create({
-      ...dto,
-      imageBase64: dto.imageBase64,
+      name: dto.name,
+      description: dto.description,
+      imageUrl,
       productThemes,
     });
 
-    return this.repo.save(entity);
+    const saved = await this.repo.save(entity);
+
+    // Update GCS path with actual ID
+    if (saved.id !== tempId) {
+      const newPath = `product-backgrounds/${saved.id}/${uuidv4()}.${fileExtension}`;
+      const newUrl = await this.gcsStorageService.uploadFile(file.buffer, newPath, file.mimetype);
+      await this.gcsStorageService.deleteFile(gcsPath);
+      saved.imageUrl = newUrl;
+      return this.repo.save(saved);
+    }
+
+    return saved;
   }
 
   async findAll(search?: string, productThemeId?: string) {
@@ -43,13 +70,19 @@ export class ProductBackgroundsService {
     const qb = this.repo
       .createQueryBuilder('background')
       .leftJoinAndSelect('background.productThemes', 'productTheme')
-      .where('background.is_deleted = false');
+      .where('background.deleted_at IS NULL');
 
     if (search) qb.andWhere('background.name ILIKE :search', { search: `%${search}%` });
     if (productThemeId) qb.andWhere('productTheme.id = :productThemeId', { productThemeId });
 
     qb.orderBy('background.created_at', 'DESC');
-    return qb.getMany();
+    const results = await qb.getMany();
+    
+    // Return imageUrl if exists, fallback to imageBase64 for backward compatibility
+    return results.map(bg => ({
+      ...bg,
+      imageUrl: bg.imageUrl || bg.imageBase64 || null,
+    }));
   }
 
   async findOne(id: string) {
@@ -58,27 +91,59 @@ export class ProductBackgroundsService {
       relations: ['productThemes'],
     });
     if (!productBackground) throw new NotFoundException('Product background not found');
-    return productBackground;
+    
+    // Return imageUrl if exists, fallback to imageBase64 for backward compatibility
+    return {
+      ...productBackground,
+      imageUrl: productBackground.imageUrl || productBackground.imageBase64 || null,
+    };
   }
 
-  async update(id: string, dto: UpdateProductBackgroundDto) {
-    const productBackground = await this.findOne(id);
-    if (dto.productThemeIds) {
-      productBackground.productThemes = await this.productThemeRepo.findByIds(dto.productThemeIds);
-    }
-    if (dto.imageBase64) {
-      productBackground.imageBase64 = dto.imageBase64;
-    }
+  async update(id: string, dto: UpdateProductBackgroundDto, file?: Express.Multer.File) {
+    const productBackground = await this.repo.findOne({
+      where: { id },
+      relations: ['productThemes'],
+    });
+    if (!productBackground) throw new NotFoundException('Product background not found');
 
     if (dto.productThemeIds) {
       productBackground.productThemes = await this.productThemeRepo.findByIds(dto.productThemeIds);
+    }
+
+    // Handle image upload if provided
+    if (file) {
+      // Delete old image from GCS if exists
+      if (productBackground.imageUrl) {
+        try {
+          const oldPath = this.gcsStorageService.extractPathFromUrl(productBackground.imageUrl);
+          await this.gcsStorageService.deleteFile(oldPath);
+        } catch (error) {
+          // Log but don't fail if deletion fails
+          console.error('Failed to delete old image:', error);
+        }
+      }
+
+      // Upload new image
+      const fileExtension = file.originalname.split('.').pop() || 'jpg';
+      const gcsPath = `product-backgrounds/${id}/${uuidv4()}.${fileExtension}`;
+      const imageUrl = await this.gcsStorageService.uploadFile(
+        file.buffer,
+        gcsPath,
+        file.mimetype,
+      );
+      productBackground.imageUrl = imageUrl;
     }
 
     productBackground.name = dto.name ?? productBackground.name;
     productBackground.description = dto.description ?? productBackground.description;
 
-    return this.repo.save(productBackground);
-    return this.repo.save(productBackground);
+    const saved = await this.repo.save(productBackground);
+    
+    // Return imageUrl if exists, fallback to imageBase64 for backward compatibility
+    return {
+      ...saved,
+      imageUrl: saved.imageUrl || saved.imageBase64 || null,
+    };
   }
 
   async softDelete(id: string) {

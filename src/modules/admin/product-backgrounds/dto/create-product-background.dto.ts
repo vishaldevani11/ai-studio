@@ -15,9 +15,13 @@ export class CreateProductBackgroundDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ example: 'data:image/png;base64,...', required: true })
-  @IsString()
-  imageBase64: string;
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'Image file (JPEG, PNG, WebP, GIF)',
+    required: true,
+  })
+  image: any; // File will be handled by FileInterceptor
 
   @ApiProperty({ example: ['uuid-of-product-theme'], required: false })
   @IsOptional()

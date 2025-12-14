@@ -20,6 +20,8 @@ import { ProductBackgroundsController } from './product-backgrounds/product-back
 import { ProductBackgroundsService } from './product-backgrounds/product-backgrounds.service';
 import { AdminUsersModule } from './admin-users/admin-users.module';
 import { AdminRegularUsersModule } from './users/users.module';
+import { LegalDocumentsModule } from './legal-documents/legal-documents.module';
+import { StorageModule } from '../../storage/storage.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { AdminRegularUsersModule } from './users/users.module';
     ]),
     AdminUsersModule,
     AdminRegularUsersModule,
+    LegalDocumentsModule,
+    StorageModule,
   ],
   controllers: [
     IndustriesController,

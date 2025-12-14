@@ -15,4 +15,12 @@ export class CreateCategoryDto {
   @ApiProperty({ example: 'uuid-of-industry', description: 'ID of the related industry' })
   @IsUUID()
   industryId: string;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'Image file (JPEG, PNG, WebP, GIF)',
+    required: false,
+  })
+  image?: any; // File will be handled by FileInterceptor
 }

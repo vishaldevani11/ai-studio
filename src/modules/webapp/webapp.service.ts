@@ -65,7 +65,7 @@ export class WebAppService {
               id: pb.id,
               name: pb.name,
               description: pb.description,
-              imageBase64: pb.imageBase64,
+              imageUrl: pb.imageUrl || pb.imageBase64 || null,
             })),
           })),
         })),

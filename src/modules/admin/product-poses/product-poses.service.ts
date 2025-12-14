@@ -5,6 +5,8 @@ import { ProductPose } from '../../../database/entities/product-pose.entity';
 import { CreateProductPoseDto } from './dto/create-product-pose.dto';
 import { UpdateProductPoseDto } from './dto/update-product-pose.dto';
 import { ProductType } from '../../../database/entities/product-type.entity';
+import { GcsStorageService } from '../../../storage/services/gcs-storage.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ProductPosesService {
@@ -13,28 +15,53 @@ export class ProductPosesService {
     private readonly repo: Repository<ProductPose>,
     @InjectRepository(ProductType)
     private readonly productTypeRepo: Repository<ProductType>,
+    private readonly gcsStorageService: GcsStorageService,
   ) {}
 
-  async create(dto: CreateProductPoseDto) {
+  async create(dto: CreateProductPoseDto, file: Express.Multer.File) {
     const productType = await this.productTypeRepo.findOne({
       where: { id: dto.productTypeId },
     });
     if (!productType) throw new NotFoundException('Product type not found');
 
-    if (!dto.imageBase64) throw new BadRequestException('Base64 image is required');
+    if (!file) throw new BadRequestException('Image file is required');
 
     const exists = await this.repo.findOne({
       where: { name: dto.name, productTypeId: dto.productTypeId },
     });
     if (exists) throw new BadRequestException('Product pose already exists for this product type');
 
+    const tempId = uuidv4();
+    const fileExtension = file.originalname.split('.').pop() || 'jpg';
+    const gcsPath = `product-poses/${dto.productTypeId}/${tempId}/${uuidv4()}.${fileExtension}`;
+
+    // Upload to GCS
+    const imageUrl = await this.gcsStorageService.uploadFile(
+      file.buffer,
+      gcsPath,
+      file.mimetype,
+    );
+
     const entity = this.repo.create({
-      ...dto,
-      imageBase64: dto.imageBase64,
+      name: dto.name,
+      description: dto.description,
+      productTypeId: dto.productTypeId,
+      imageUrl,
       productType,
     });
 
-    return this.repo.save(entity);
+    const saved = await this.repo.save(entity);
+
+    // Update GCS path with actual ID
+    if (saved.id !== tempId) {
+      const newPath = `product-poses/${dto.productTypeId}/${saved.id}/${uuidv4()}.${fileExtension}`;
+      const newUrl = await this.gcsStorageService.uploadFile(file.buffer, newPath, file.mimetype);
+      await this.gcsStorageService.deleteFile(gcsPath);
+      saved.imageUrl = newUrl;
+      return this.repo.save(saved);
+    }
+
+    return saved;
   }
 
   async findAll(productTypeId?: string, search?: string) {
@@ -42,11 +69,17 @@ export class ProductPosesService {
     if (productTypeId) where.productTypeId = productTypeId;
     if (search) where.name = ILike(`%${search}%`);
 
-    return this.repo.find({
+    const results = await this.repo.find({
       where,
       relations: ['productType', 'productType.category'],
       order: { createdAt: 'DESC' },
     });
+
+    // Return imageUrl if exists, fallback to imageBase64 for backward compatibility
+    return results.map(pose => ({
+      ...pose,
+      imageUrl: pose.imageUrl || pose.imageBase64 || null,
+    }));
   }
 
   async findOne(id: string) {
@@ -55,11 +88,20 @@ export class ProductPosesService {
       relations: ['productType', 'productType.category'],
     });
     if (!pose) throw new NotFoundException('Product pose not found');
-    return pose;
+    
+    // Return imageUrl if exists, fallback to imageBase64 for backward compatibility
+    return {
+      ...pose,
+      imageUrl: pose.imageUrl || pose.imageBase64 || null,
+    };
   }
 
-  async update(id: string, dto: UpdateProductPoseDto) {
-    const pose = await this.findOne(id);
+  async update(id: string, dto: UpdateProductPoseDto, file?: Express.Multer.File) {
+    const pose = await this.repo.findOne({
+      where: { id },
+      relations: ['productType', 'productType.category'],
+    });
+    if (!pose) throw new NotFoundException('Product pose not found');
 
     if (dto.productTypeId) {
       const newPt = await this.productTypeRepo.findOne({
@@ -81,12 +123,40 @@ export class ProductPosesService {
         throw new BadRequestException('Product pose already exists for this product type');
       }
     }
+
+    // Handle image upload if provided
+    if (file) {
+      // Delete old image from GCS if exists
+      if (pose.imageUrl) {
+        try {
+          const oldPath = this.gcsStorageService.extractPathFromUrl(pose.imageUrl);
+          await this.gcsStorageService.deleteFile(oldPath);
+        } catch (error) {
+          console.error('Failed to delete old image:', error);
+        }
+      }
+
+      // Upload new image
+      const fileExtension = file.originalname.split('.').pop() || 'jpg';
+      const gcsPath = `product-poses/${pose.productTypeId}/${id}/${uuidv4()}.${fileExtension}`;
+      const imageUrl = await this.gcsStorageService.uploadFile(
+        file.buffer,
+        gcsPath,
+        file.mimetype,
+      );
+      pose.imageUrl = imageUrl;
+    }
+
     pose.name = dto.name ?? pose.name;
     pose.description = dto.description ?? pose.description;
-    if (dto.imageBase64) {
-      pose.imageBase64 = dto.imageBase64;
-    }
-    return this.repo.save(pose);
+
+    const saved = await this.repo.save(pose);
+    
+    // Return imageUrl if exists, fallback to imageBase64 for backward compatibility
+    return {
+      ...saved,
+      imageUrl: saved.imageUrl || saved.imageBase64 || null,
+    };
   }
 
   async softDelete(id: string) {
