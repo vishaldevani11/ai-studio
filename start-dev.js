@@ -69,10 +69,10 @@ async function startDevelopment() {
     // Step 4: Start development server
     console.log('🚀 Starting development server...');
     console.log('📋 Server will be available at:');
-    console.log('   - API: http://localhost:3000');
-    console.log('   - Swagger: http://localhost:3000/api/docs');
-    console.log('   - Health: http://localhost:3000/api/v1/health');
-    console.log('   - Metrics: http://localhost:3000/api/v1/metrics/prometheus');
+    console.log('   - API: http://localhost:8080');
+    console.log('   - Swagger: http://localhost:8080/api/docs');
+    console.log('   - Health: http://localhost:8080/api/v1/health');
+    console.log('   - Metrics: http://localhost:8080/api/v1/metrics/prometheus');
     console.log('\n📝 Press Ctrl+C to stop the server\n');
 
     // Start the development server

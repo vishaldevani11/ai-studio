@@ -5,6 +5,7 @@ import { ProductPose } from '../../../database/entities/product-pose.entity';
 import { CreateProductPoseDto } from './dto/create-product-pose.dto';
 import { UpdateProductPoseDto } from './dto/update-product-pose.dto';
 import { ProductType } from '../../../database/entities/product-type.entity';
+import { ProductBackground } from '../../../database/entities/product-background.entity';
 import { GcsStorageService } from '../../../storage/services/gcs-storage.service';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,6 +16,8 @@ export class ProductPosesService {
     private readonly repo: Repository<ProductPose>,
     @InjectRepository(ProductType)
     private readonly productTypeRepo: Repository<ProductType>,
+    @InjectRepository(ProductBackground)
+    private readonly productBackgroundRepo: Repository<ProductBackground>,
     private readonly gcsStorageService: GcsStorageService,
   ) {}
 
@@ -30,6 +33,10 @@ export class ProductPosesService {
       where: { name: dto.name, productTypeId: dto.productTypeId },
     });
     if (exists) throw new BadRequestException('Product pose already exists for this product type');
+
+    const productBackgrounds = dto.productBackgroundIds
+      ? await this.productBackgroundRepo.findByIds(dto.productBackgroundIds)
+      : [];
 
     const tempId = uuidv4();
     const fileExtension = file.originalname.split('.').pop() || 'jpg';
@@ -48,6 +55,7 @@ export class ProductPosesService {
       productTypeId: dto.productTypeId,
       imageUrl,
       productType,
+      productBackgrounds,
     });
 
     const saved = await this.repo.save(entity);
@@ -71,7 +79,7 @@ export class ProductPosesService {
 
     const results = await this.repo.find({
       where,
-      relations: ['productType', 'productType.category'],
+      relations: ['productType', 'productType.category', 'productBackgrounds'],
       order: { createdAt: 'DESC' },
     });
 
@@ -85,7 +93,7 @@ export class ProductPosesService {
   async findOne(id: string) {
     const pose = await this.repo.findOne({
       where: { id },
-      relations: ['productType', 'productType.category'],
+      relations: ['productType', 'productType.category', 'productBackgrounds'],
     });
     if (!pose) throw new NotFoundException('Product pose not found');
     
@@ -99,7 +107,7 @@ export class ProductPosesService {
   async update(id: string, dto: UpdateProductPoseDto, file?: Express.Multer.File) {
     const pose = await this.repo.findOne({
       where: { id },
-      relations: ['productType', 'productType.category'],
+      relations: ['productType', 'productType.category', 'productBackgrounds'],
     });
     if (!pose) throw new NotFoundException('Product pose not found');
 
@@ -110,6 +118,12 @@ export class ProductPosesService {
       if (!newPt) throw new NotFoundException('New product type not found');
       pose.productType = newPt;
       pose.productTypeId = dto.productTypeId;
+    }
+
+    if (dto.productBackgroundIds !== undefined) {
+      pose.productBackgrounds = dto.productBackgroundIds.length > 0
+        ? await this.productBackgroundRepo.findByIds(dto.productBackgroundIds)
+        : [];
     }
 
     if (dto.name) {

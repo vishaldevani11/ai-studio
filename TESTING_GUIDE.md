@@ -61,7 +61,7 @@ npm run lint
 ```bash
 npm run start:dev
 ```
-**Expected**: Server starts on http://localhost:3000
+**Expected**: Server starts on http://localhost:8080
 
 ### 4. API Testing
 ```bash
@@ -73,26 +73,26 @@ node test-image-generation.js
 
 ### Health Check
 ```bash
-curl http://localhost:3000/api/v1/health
+curl http://localhost:8080/api/v1/health
 ```
 
 ### Swagger Documentation
-Open: http://localhost:3000/api/docs
+Open: http://localhost:8080/api/docs
 
 ### Image Generation API
 ```bash
 # 1. Register user
-curl -X POST http://localhost:3000/api/v1/auth/register \
+curl -X POST http://localhost:8080/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"password123","firstName":"John","lastName":"Doe"}'
 
 # 2. Login
-curl -X POST http://localhost:3000/api/v1/auth/login \
+curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"password123"}'
 
 # 3. Generate image (replace <token> with JWT from login)
-curl -X POST http://localhost:3000/api/v1/images/generate \
+curl -X POST http://localhost:8080/api/v1/images/generate \
   -H "Authorization: Bearer <token>" \
   -F "images=@test-image.jpg" \
   -F "gender=male" \
@@ -103,12 +103,12 @@ curl -X POST http://localhost:3000/api/v1/images/generate \
 
 ### Prometheus Metrics
 ```bash
-curl http://localhost:3000/api/v1/metrics/prometheus
+curl http://localhost:8080/api/v1/metrics/prometheus
 ```
 
 ### Health Metrics
 ```bash
-curl http://localhost:3000/api/v1/metrics/health
+curl http://localhost:8080/api/v1/metrics/health
 ```
 
 ## 🐛 Troubleshooting
@@ -149,16 +149,16 @@ sudo systemctl start redis
 
 #### 3. Port Already in Use
 ```
-Error: listen EADDRINUSE: address already in use :::3000
+Error: listen EADDRINUSE: address already in use :::8080
 ```
-**Solution**: Kill process using port 3000
+**Solution**: Kill process using port 8080
 ```bash
 # Windows
-netstat -ano | findstr :3000
+netstat -ano | findstr :8080
 taskkill /PID <PID> /F
 
 # macOS/Linux
-lsof -ti:3000 | xargs kill -9
+lsof -ti:8080 | xargs kill -9
 ```
 
 #### 4. TypeScript Compilation Errors
@@ -194,7 +194,7 @@ backend/
 - Dist folder created
 
 ### ✅ Successful Server Start
-- Server listening on port 3000
+- Server listening on port 8080
 - Database connection established
 - All modules loaded
 

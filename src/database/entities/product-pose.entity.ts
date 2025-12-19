@@ -1,5 +1,6 @@
-import { Entity, Column, ManyToOne, Index, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, ManyToMany, Index, JoinColumn, JoinTable } from 'typeorm';
 import { ProductType } from './product-type.entity';
+import { ProductBackground } from './product-background.entity';
 import { BaseEntity } from './base.entity';
 
 @Entity('product_poses')
@@ -23,4 +24,12 @@ export class ProductPose extends BaseEntity {
 
   @Column({ name: 'product_type_id' })
   productTypeId: string;
+
+  @ManyToMany(() => ProductBackground, pb => pb.productPoses)
+  @JoinTable({
+    name: 'product_pose_backgrounds',
+    joinColumn: { name: 'product_pose_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'product_background_id', referencedColumnName: 'id' },
+  })
+  productBackgrounds: ProductBackground[];
 }

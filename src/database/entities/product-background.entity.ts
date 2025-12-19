@@ -1,5 +1,6 @@
 import { Entity, Column, ManyToMany, Index } from 'typeorm';
 import { ProductTheme } from './product-theme.entity';
+import { ProductPose } from './product-pose.entity';
 import { BaseEntity } from './base.entity';
 
 @Entity('product_backgrounds')
@@ -19,4 +20,7 @@ export class ProductBackground extends BaseEntity {
 
   @ManyToMany(() => ProductTheme, pt => pt.productBackgrounds)
   productThemes: ProductTheme[];
+
+  @ManyToMany(() => ProductPose, pose => pose.productBackgrounds)
+  productPoses: ProductPose[];
 }

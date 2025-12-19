@@ -1,4 +1,4 @@
-import { IsString, IsUUID, IsOptional, Length } from 'class-validator';
+import { IsString, IsUUID, IsOptional, Length, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductPoseDto {
@@ -23,4 +23,10 @@ export class CreateProductPoseDto {
   @ApiProperty({ example: 'uuid-of-product-type', description: 'Associated product type ID' })
   @IsUUID()
   productTypeId: string;
+
+  @ApiProperty({ example: ['uuid-of-product-background'], required: false, description: 'Associated product background IDs' })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('all', { each: true })
+  productBackgroundIds?: string[];
 }

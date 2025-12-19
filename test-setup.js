@@ -131,14 +131,14 @@ console.log('\n🎉 Setup completed successfully!');
 console.log('\n📋 Next Steps:');
 console.log('1. Start the development server: npm run start:dev');
 console.log('2. Test the API: node test-image-generation.js');
-console.log('3. Check Swagger docs: http://localhost:3000/api/docs');
-console.log('4. Check health: http://localhost:3000/api/v1/health');
+console.log('3. Check Swagger docs: http://localhost:8080/api/docs');
+console.log('4. Check health: http://localhost:8080/api/v1/health');
 
 console.log('\n🔧 Configuration Summary:');
 console.log('- Database: PostgreSQL (localhost:5432)');
 console.log('- Redis: localhost:6379');
 console.log('- Storage: Local filesystem');
-console.log('- Port: 3000');
+console.log('- Port: 8080');
 console.log('- Environment: development');
 
 console.log('\n⚠️ Important Notes:');

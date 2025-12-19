@@ -109,9 +109,9 @@ npm run start:dev
 
 After starting the application, you'll have:
 
-- ✅ **API Server**: http://localhost:3000
-- ✅ **Swagger Docs**: http://localhost:3000/api/docs
-- ✅ **Health Check**: http://localhost:3000/api/v1/health
+- ✅ **API Server**: http://localhost:8080
+- ✅ **Swagger Docs**: http://localhost:8080/api/docs
+- ✅ **Health Check**: http://localhost:8080/api/v1/health
 - ✅ **Authentication**: JWT-based with refresh tokens
 - ✅ **Security**: Rate limiting, validation, CORS
 
@@ -154,10 +154,10 @@ STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
 
 Once the application is running, you can access:
 
-- **🌐 Swagger UI**: http://localhost:3000/api/docs
-- **❤️ Health Check**: http://localhost:3000/api/v1/health
-- **📊 Metrics**: http://localhost:3000/api/v1/metrics/prometheus
-- **🔍 Health Metrics**: http://localhost:3000/api/v1/metrics/health
+- **🌐 Swagger UI**: http://localhost:8080/api/docs
+- **❤️ Health Check**: http://localhost:8080/api/v1/health
+- **📊 Metrics**: http://localhost:8080/api/v1/metrics/prometheus
+- **🔍 Health Metrics**: http://localhost:8080/api/v1/metrics/health
 
 ### 🔐 Authentication Endpoints
 
@@ -196,7 +196,7 @@ Once the application is running, you can access:
 
 #### 1. Register User
 ```bash
-curl -X POST http://localhost:3000/api/v1/auth/register \
+curl -X POST http://localhost:8080/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -208,7 +208,7 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
 
 #### 2. Login
 ```bash
-curl -X POST http://localhost:3000/api/v1/auth/login \
+curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -220,7 +220,7 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
 
 #### 4. Check Health
 ```bash
-curl http://localhost:3000/api/v1/health
+curl http://localhost:8080/api/v1/health
 ```
 
 ## 🧪 Testing

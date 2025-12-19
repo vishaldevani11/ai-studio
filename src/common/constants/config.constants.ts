@@ -1,5 +1,5 @@
 export const DEFAULT_NODE_ENV = 'development';
-export const DEFAULT_PORT = 3000;
+export const DEFAULT_PORT = 8080;
 
 export const DEFAULT_DB_HOST = 'localhost';
 export const DEFAULT_DB_PORT = 5432;
@@ -12,7 +12,7 @@ export const DEFAULT_JWT_EXPIRES_IN = '15m';
 export const DEFAULT_JWT_REFRESH_SECRET = 'default-refresh-secret';
 export const DEFAULT_JWT_REFRESH_EXPIRES_IN = '7d';
 
-export const DEFAULT_CORS_ORIGIN = 'http://localhost:3000';
+export const DEFAULT_CORS_ORIGIN = 'http://localhost:8080';
 
 export const DEFAULT_THROTTLE_TTL = 60;
 export const DEFAULT_THROTTLE_LIMIT = 100;
@@ -53,7 +53,7 @@ export const DEFAULT_GCS_PROJECT_ID = 'your-gcs-project-id';
 export const DEFAULT_GCS_KEY_FILENAME = './gcs-service-account.json';
 export const DEFAULT_GCS_CDN_BASE_URL = 'https://storage.googleapis.com';
 
-export const DEFAULT_BASE_URL = 'http://localhost:3000';
+export const DEFAULT_BASE_URL = 'http://localhost:8080';
 
 // WhatsApp Business API Defaults
 export const DEFAULT_WHATSAPP_PROVIDER = 'meta-direct';

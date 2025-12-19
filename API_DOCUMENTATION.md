@@ -7,7 +7,7 @@ This document provides a detailed description of the AI-app Backend API. The API
 ## Base URL
 
 ```
-http://localhost:3000/api/v1
+http://localhost:8080/api/v1
 ```
 
 ## Authentication

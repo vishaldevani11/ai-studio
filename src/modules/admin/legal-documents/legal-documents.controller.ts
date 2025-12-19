@@ -1,6 +1,7 @@
 import { ROUTES } from '../../../common/constants';
 import {
   Controller,
+  Get,
   Put,
   Body,
   HttpCode,
@@ -50,5 +51,48 @@ export class LegalDocumentsController {
     const document = await this.legalDocumentsService.updateTermsOfService(dto);
     return ResponseUtil.success(document, 'Terms of service updated successfully');
   }
-}
 
+  @Get('privacy-policy')
+  @ApiOperation({ summary: 'Get privacy policy' })
+  @ApiResponse({ status: 200, description: 'Privacy policy retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Privacy policy not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getPrivacyPolicy() {
+    const document = await this.legalDocumentsService.getPrivacyPolicy();
+    if (!document) {
+      return ResponseUtil.success(
+        { content: '', lastUpdated: null },
+        'Privacy policy not found',
+      );
+    }
+    return ResponseUtil.success(
+      {
+        content: document.content,
+        lastUpdated: document.lastUpdated,
+      },
+      'Privacy policy retrieved successfully',
+    );
+  }
+
+  @Get('terms-of-service')
+  @ApiOperation({ summary: 'Get terms of service' })
+  @ApiResponse({ status: 200, description: 'Terms of service retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Terms of service not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getTermsOfService() {
+    const document = await this.legalDocumentsService.getTermsOfService();
+    if (!document) {
+      return ResponseUtil.success(
+        { content: '', lastUpdated: null },
+        'Terms of service not found',
+      );
+    }
+    return ResponseUtil.success(
+      {
+        content: document.content,
+        lastUpdated: document.lastUpdated,
+      },
+      'Terms of service retrieved successfully',
+    );
+  }
+}

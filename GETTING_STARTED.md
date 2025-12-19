@@ -75,9 +75,9 @@ npm run start:prod
 ```
 
 The application will be available at:
-- **API**: http://localhost:3000
-- **Swagger Docs**: http://localhost:3000/api/docs
-- **Health Check**: http://localhost:3000/api/v1/health
+- **API**: http://localhost:8080
+- **Swagger Docs**: http://localhost:8080/api/docs
+- **Health Check**: http://localhost:8080/api/v1/health
 
 ## 🧪 Testing
 
@@ -118,7 +118,7 @@ npm run migration:revert
 ### 1. Register a User
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/auth/register \
+curl -X POST http://localhost:8080/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -131,7 +131,7 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
 ### 2. Login
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/auth/login \
+curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -172,10 +172,10 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
 
 4. **Port Already in Use**
    ```
-   Error: listen EADDRINUSE :::3000
+   Error: listen EADDRINUSE :::8080
    ```
    - Change PORT in `.env`
-   - Or kill process using port 3000
+   - Or kill process using port 8080
 
 ### Debug Mode
 
